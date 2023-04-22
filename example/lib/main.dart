@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Google Places Autocomplete Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -38,6 +38,13 @@ class MyHomePage extends StatelessWidget {
         child: GooglePlacesAutoCompleteTextFormField(
           textEditingController: _textController,
           googleAPIKey: _yourGoogleAPIKey,
+          maxLines: 1,
+          overlayContainer: (child) => Material(
+            elevation: 1.0,
+            color: Colors.green,
+            borderRadius: BorderRadius.circular(12),
+            child: child,
+          ),
         ),
       ),
     );
