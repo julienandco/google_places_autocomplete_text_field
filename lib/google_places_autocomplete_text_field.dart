@@ -151,6 +151,8 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   final LayerLink _layerLink = LayerLink();
   bool isSearched = false;
 
+  final Dio _dio = Dio();
+
   @override
   void initState() {
     subject.stream
@@ -230,7 +232,6 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   }
 
   Future<void> getLocation(String text) async {
-    Dio dio = Dio();
     String url =
         "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$text&key=${widget.googleAPIKey}";
 
@@ -246,7 +247,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       }
     }
 
-    Response response = await dio.get(url);
+    Response response = await _dio.get(url);
     PlacesAutocompleteResponse subscriptionResponse =
         PlacesAutocompleteResponse.fromJson(response.data);
 
@@ -337,7 +338,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     try {
       var url =
           "https://maps.googleapis.com/maps/api/place/details/json?placeid=${prediction.placeId}&key=${widget.googleAPIKey}";
-      Response response = await Dio().get(
+      Response response = await _dio.get(
         url,
       );
 
