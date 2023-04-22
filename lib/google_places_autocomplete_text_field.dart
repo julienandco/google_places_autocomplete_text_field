@@ -1,5 +1,7 @@
 library google_places_autocomplete_text_field;
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
@@ -162,11 +164,14 @@ class _GooglePlacesAutoCompleteTextFormFieldState
         .listen(textChanged);
 
     _focus = widget.focusNode ?? FocusNode();
-    _focus.addListener(() {
-      if (!_focus.hasFocus) {
-        removeOverlay();
-      }
-    });
+
+    if (!Platform.isMacOS) {
+      _focus.addListener(() {
+        if (!_focus.hasFocus) {
+          removeOverlay();
+        }
+      });
+    }
 
     super.initState();
   }
@@ -300,31 +305,32 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     return null;
   }
 
-  Widget get _overlayChild => ListView.builder(
-        padding: EdgeInsets.zero,
-        shrinkWrap: true,
-        itemCount: allPredictions.length,
-        itemBuilder: (BuildContext context, int index) => GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            if (index < allPredictions.length) {
-              widget.itmClick!(allPredictions[index]);
-              if (!widget.isLatLngRequired) return;
+  Widget get _overlayChild {
+    return ListView.builder(
+      padding: EdgeInsets.zero,
+      shrinkWrap: true,
+      itemCount: allPredictions.length,
+      itemBuilder: (BuildContext context, int index) => InkWell(
+        onTap: () {
+          if (index < allPredictions.length) {
+            widget.itmClick!(allPredictions[index]);
+            if (!widget.isLatLngRequired) return;
 
-              getPlaceDetailsFromPlaceId(allPredictions[index]);
+            getPlaceDetailsFromPlaceId(allPredictions[index]);
 
-              removeOverlay();
-            }
-          },
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            child: Text(
-              allPredictions[index].description!,
-              style: widget.predictionsStyle ?? widget.style,
-            ),
+            removeOverlay();
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          child: Text(
+            allPredictions[index].description!,
+            style: widget.predictionsStyle ?? widget.style,
           ),
         ),
-      );
+      ),
+    );
+  }
 
   void removeOverlay() {
     allPredictions.clear();

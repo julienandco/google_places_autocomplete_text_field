@@ -1,5 +1,9 @@
 # Changelog 🪵
 
+## 0.0.3
+
+* [Fix]: Fixed a bug on MacOS where clicking on the predictions would not be registered.
+
 ## 0.0.2
 
 * [Add]: New argument ```overlayContainer``` so that you can now fully customize the appearance of the predictions as well!
