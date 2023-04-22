@@ -68,6 +68,8 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   final String googleAPIKey;
   final int debounceTime;
   final List<String>? countries;
+  final TextStyle? predictionsStyle;
+  final OverlayContainer? overlayContainer;
 
   const GooglePlacesAutoCompleteTextFormField({
     super.key,
@@ -81,6 +83,8 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.isLatLngRequired = true,
     this.countries = const [],
     this.getPlaceDetailWithLatLng,
+    this.predictionsStyle,
+    this.overlayContainer,
 
     ////// DEFAULT TEXT FORM INPUTS
     this.initialValue,
@@ -274,54 +278,59 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       RenderBox renderBox = context.findRenderObject() as RenderBox;
       var size = renderBox.size;
       var offset = renderBox.localToGlobal(Offset.zero);
+
       return OverlayEntry(
-          builder: (context) => Positioned(
-                left: offset.dx,
-                top: size.height + offset.dy,
-                width: size.width,
-                child: CompositedTransformFollower(
-                  showWhenUnlinked: false,
-                  link: _layerLink,
-                  offset: Offset(0.0, size.height + 5.0),
-                  child: Material(
-                      elevation: 1.0,
-                      child: ListView.builder(
-                        padding: EdgeInsets.zero,
-                        shrinkWrap: true,
-                        itemCount: allPredictions.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return InkWell(
-                            onTap: () {
-                              if (index < allPredictions.length) {
-                                widget.itmClick!(allPredictions[index]);
-                                if (!widget.isLatLngRequired) return;
-
-                                getPlaceDetailsFromPlaceId(
-                                    allPredictions[index]);
-
-                                removeOverlay();
-                              }
-                            },
-                            child: Container(
-                                padding: const EdgeInsets.all(10),
-                                child:
-                                    Text(allPredictions[index].description!)),
-                          );
-                        },
-                      )),
+        builder: (context) => Positioned(
+          left: offset.dx,
+          top: size.height + offset.dy,
+          width: size.width,
+          child: CompositedTransformFollower(
+            showWhenUnlinked: false,
+            link: _layerLink,
+            offset: Offset(0.0, size.height + 5.0),
+            child: widget.overlayContainer?.call(_overlayChild) ??
+                Material(
+                  elevation: 1.0,
+                  child: _overlayChild,
                 ),
-              ));
+          ),
+        ),
+      );
     }
     return null;
   }
 
+  Widget get _overlayChild => ListView.builder(
+        padding: EdgeInsets.zero,
+        shrinkWrap: true,
+        itemCount: allPredictions.length,
+        itemBuilder: (BuildContext context, int index) => GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            if (index < allPredictions.length) {
+              widget.itmClick!(allPredictions[index]);
+              if (!widget.isLatLngRequired) return;
+
+              getPlaceDetailsFromPlaceId(allPredictions[index]);
+
+              removeOverlay();
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            child: Text(
+              allPredictions[index].description!,
+              style: widget.predictionsStyle ?? widget.style,
+            ),
+          ),
+        ),
+      );
+
   void removeOverlay() {
     allPredictions.clear();
     _overlayEntry = _createOverlayEntry();
-    if (context.mounted) {
-      Overlay.of(context).insert(_overlayEntry!);
-      _overlayEntry!.markNeedsBuild();
-    }
+    Overlay.of(context).insert(_overlayEntry!);
+    _overlayEntry!.markNeedsBuild();
   }
 
   Future<void> getPlaceDetailsFromPlaceId(Prediction prediction) async {
@@ -353,3 +362,4 @@ PlaceDetails parsePlaceDetailMap(Map responseBody) =>
 typedef ItemClick = void Function(Prediction postalCodeResponse);
 typedef GetPlaceDetailswWithLatLng = void Function(
     Prediction postalCodeResponse);
+typedef OverlayContainer = Widget Function(Widget overlayChild);
