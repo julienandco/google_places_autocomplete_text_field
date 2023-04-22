@@ -152,6 +152,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   bool isSearched = false;
 
   final Dio _dio = Dio();
+  late FocusNode _focus;
 
   @override
   void initState() {
@@ -160,13 +161,13 @@ class _GooglePlacesAutoCompleteTextFormFieldState
         .debounceTime(Duration(milliseconds: widget.debounceTime))
         .listen(textChanged);
 
-    if (widget.focusNode != null) {
-      widget.focusNode!.addListener(() {
-        if (!widget.focusNode!.hasFocus) {
-          removeOverlay();
-        }
-      });
-    }
+    _focus = widget.focusNode ?? FocusNode();
+    _focus.addListener(() {
+      if (!_focus.hasFocus) {
+        removeOverlay();
+      }
+    });
+
     super.initState();
   }
 
@@ -177,7 +178,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       child: TextFormField(
         controller: widget.textEditingController,
         initialValue: widget.initialValue,
-        focusNode: widget.focusNode,
+        focusNode: _focus,
         decoration: widget.inputDecoration,
         keyboardType: widget.keyboardType,
         textCapitalization: widget.textCapitalization,
