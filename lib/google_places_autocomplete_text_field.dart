@@ -237,7 +237,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
 
     if (widget.countries != null) {
       for (int i = 0; i < widget.countries!.length; i++) {
-        String country = widget.countries![i];
+        final country = widget.countries![i];
 
         if (i == 0) {
           url = "$url&components=country:$country";
@@ -247,8 +247,8 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       }
     }
 
-    Response response = await _dio.get(url);
-    PlacesAutocompleteResponse subscriptionResponse =
+    final response = await _dio.get(url);
+    final subscriptionResponse =
         PlacesAutocompleteResponse.fromJson(response.data);
 
     if (text.isEmpty) {
@@ -264,19 +264,17 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     }
   }
 
-  Future<void> textChanged(String text) async {
-    getLocation(text).then(
-      (_) {
-        _overlayEntry = null;
-        _overlayEntry = _createOverlayEntry();
-        Overlay.of(context).insert(_overlayEntry!);
-      },
-    );
-  }
+  Future<void> textChanged(String text) async => getLocation(text).then(
+        (_) {
+          _overlayEntry = null;
+          _overlayEntry = _createOverlayEntry();
+          Overlay.of(context).insert(_overlayEntry!);
+        },
+      );
 
   OverlayEntry? _createOverlayEntry() {
     if (context.findRenderObject() != null) {
-      RenderBox renderBox = context.findRenderObject() as RenderBox;
+      final renderBox = context.findRenderObject() as RenderBox;
       var size = renderBox.size;
       var offset = renderBox.localToGlobal(Offset.zero);
 
@@ -336,13 +334,13 @@ class _GooglePlacesAutoCompleteTextFormFieldState
 
   Future<void> getPlaceDetailsFromPlaceId(Prediction prediction) async {
     try {
-      var url =
+      final url =
           "https://maps.googleapis.com/maps/api/place/details/json?placeid=${prediction.placeId}&key=${widget.googleAPIKey}";
-      Response response = await _dio.get(
+      final response = await _dio.get(
         url,
       );
 
-      PlaceDetails placeDetails = PlaceDetails.fromJson(response.data);
+      final placeDetails = PlaceDetails.fromJson(response.data);
 
       prediction.lat = placeDetails.result!.geometry!.location!.lat.toString();
       prediction.lng = placeDetails.result!.geometry!.location!.lng.toString();
