@@ -142,9 +142,8 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     extends State<GooglePlacesAutoCompleteTextFormField> {
   final subject = PublishSubject<String>();
   OverlayEntry? _overlayEntry;
-  List<Prediction> alPredictions = [];
+  List<Prediction> allPredictions = [];
 
-  TextEditingController controller = TextEditingController();
   final LayerLink _layerLink = LayerLink();
   bool isSearched = false;
 
@@ -154,6 +153,14 @@ class _GooglePlacesAutoCompleteTextFormFieldState
         .distinct()
         .debounceTime(Duration(milliseconds: widget.debounceTime))
         .listen(textChanged);
+
+    if (widget.focusNode != null) {
+      widget.focusNode!.addListener(() {
+        if (!widget.focusNode!.hasFocus) {
+          removeOverlay();
+        }
+      });
+    }
     super.initState();
   }
 
@@ -240,19 +247,19 @@ class _GooglePlacesAutoCompleteTextFormFieldState
         PlacesAutocompleteResponse.fromJson(response.data);
 
     if (text.isEmpty) {
-      alPredictions.clear();
+      allPredictions.clear();
       _overlayEntry!.remove();
       return;
     }
 
     isSearched = false;
     if (subscriptionResponse.predictions!.isNotEmpty) {
-      alPredictions.clear();
-      alPredictions.addAll(subscriptionResponse.predictions!);
+      allPredictions.clear();
+      allPredictions.addAll(subscriptionResponse.predictions!);
     }
   }
 
-  textChanged(String text) async {
+  Future<void> textChanged(String text) async {
     getLocation(text).then(
       (_) {
         _overlayEntry = null;
@@ -281,23 +288,24 @@ class _GooglePlacesAutoCompleteTextFormFieldState
                       child: ListView.builder(
                         padding: EdgeInsets.zero,
                         shrinkWrap: true,
-                        itemCount: alPredictions.length,
+                        itemCount: allPredictions.length,
                         itemBuilder: (BuildContext context, int index) {
                           return InkWell(
                             onTap: () {
-                              if (index < alPredictions.length) {
-                                widget.itmClick!(alPredictions[index]);
+                              if (index < allPredictions.length) {
+                                widget.itmClick!(allPredictions[index]);
                                 if (!widget.isLatLngRequired) return;
 
                                 getPlaceDetailsFromPlaceId(
-                                    alPredictions[index]);
+                                    allPredictions[index]);
 
                                 removeOverlay();
                               }
                             },
                             child: Container(
                                 padding: const EdgeInsets.all(10),
-                                child: Text(alPredictions[index].description!)),
+                                child:
+                                    Text(allPredictions[index].description!)),
                           );
                         },
                       )),
@@ -307,8 +315,8 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     return null;
   }
 
-  removeOverlay() {
-    alPredictions.clear();
+  void removeOverlay() {
+    allPredictions.clear();
     _overlayEntry = _createOverlayEntry();
     if (context.mounted) {
       Overlay.of(context).insert(_overlayEntry!);
