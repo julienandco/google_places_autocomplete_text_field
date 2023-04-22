@@ -16,8 +16,8 @@ dependencies:
     GooglePlacesAutoCompleteTextFormField(
         textEditingController: controller,
         googleAPIKey: "YOUR_GOOGLE_API_KEY",
-        debounceTime: 800 // default 600 ms,
-        countries: ["in","fr"], // optional, by default the list is empty (no restrictions)
+        debounceTime: 400 // defaults to 600 ms,
+        countries: ["de"], // optional, by default the list is empty (no restrictions)
         isLatLngRequired: true, // if you require the coordinates from the place details
         getPlaceDetailWithLatLng: (prediction) {
          // this method will return latlng with place detail
