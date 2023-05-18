@@ -26,6 +26,8 @@ class MyHomePage extends StatelessWidget {
   final String title;
 
   final _yourGoogleAPIKey = 'foo-bar-baz';
+  final _yourProxyURL = 'https://your-proxy.com/';
+
   final _textController = TextEditingController();
 
   @override
@@ -38,6 +40,7 @@ class MyHomePage extends StatelessWidget {
         child: GooglePlacesAutoCompleteTextFormField(
           textEditingController: _textController,
           googleAPIKey: _yourGoogleAPIKey,
+          proxyURL: _yourProxyURL,
           maxLines: 1,
           overlayContainer: (child) => Material(
             elevation: 1.0,

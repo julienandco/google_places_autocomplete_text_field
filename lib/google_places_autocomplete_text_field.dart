@@ -2,6 +2,7 @@ library google_places_autocomplete_text_field;
 
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
@@ -72,6 +73,7 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   final List<String>? countries;
   final TextStyle? predictionsStyle;
   final OverlayContainer? overlayContainer;
+  final String? proxyURL;
 
   const GooglePlacesAutoCompleteTextFormField({
     super.key,
@@ -87,6 +89,7 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.getPlaceDetailWithLatLng,
     this.predictionsStyle,
     this.overlayContainer,
+    this.proxyURL,
 
     ////// DEFAULT TEXT FORM INPUTS
     this.initialValue,
@@ -165,7 +168,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
 
     _focus = widget.focusNode ?? FocusNode();
 
-    if (!Platform.isMacOS) {
+    if (!kIsWeb && !Platform.isMacOS) {
       _focus.addListener(() {
         if (!_focus.hasFocus) {
           removeOverlay();
@@ -239,7 +242,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
 
   Future<void> getLocation(String text) async {
     String url =
-        "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$text&key=${widget.googleAPIKey}";
+        "${widget.proxyURL}https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$text&key=${widget.googleAPIKey}";
 
     if (widget.countries != null) {
       for (int i = 0; i < widget.countries!.length; i++) {
@@ -252,8 +255,8 @@ class _GooglePlacesAutoCompleteTextFormFieldState
         }
       }
     }
-
     final response = await _dio.get(url);
+
     final subscriptionResponse =
         PlacesAutocompleteResponse.fromJson(response.data);
 
@@ -342,7 +345,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   Future<void> getPlaceDetailsFromPlaceId(Prediction prediction) async {
     try {
       final url =
-          "https://maps.googleapis.com/maps/api/place/details/json?placeid=${prediction.placeId}&key=${widget.googleAPIKey}";
+          "${widget.proxyURL}https://maps.googleapis.com/maps/api/place/details/json?placeid=${prediction.placeId}&key=${widget.googleAPIKey}";
       final response = await _dio.get(
         url,
       );

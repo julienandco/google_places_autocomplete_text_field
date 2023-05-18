@@ -1,5 +1,9 @@
 # Changelog 🪵
 
+## 0.1.0
+
+* [Add]: Added compatibility for Flutter Web 🌐. Just pass the ```GooglePlacesAutoCompleteTextFormField``` a proxy URL and you're good to go!
+
 ## 0.0.3
 
 * [Fix]: Fixed a bug on MacOS where clicking on the predictions would not be registered.
