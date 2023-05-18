@@ -77,7 +77,7 @@ macos/
 linux/
 
 # Web related 
-web/
+/web/
 
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3
