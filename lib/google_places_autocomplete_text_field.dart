@@ -241,8 +241,9 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   }
 
   Future<void> getLocation(String text) async {
+    final prefix = widget.proxyURL ?? "";
     String url =
-        "${widget.proxyURL}https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$text&key=${widget.googleAPIKey}";
+        "${prefix}https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$text&key=${widget.googleAPIKey}";
 
     if (widget.countries != null) {
       for (int i = 0; i < widget.countries!.length; i++) {
@@ -344,8 +345,9 @@ class _GooglePlacesAutoCompleteTextFormFieldState
 
   Future<void> getPlaceDetailsFromPlaceId(Prediction prediction) async {
     try {
+      final prefix = widget.proxyURL ?? "";
       final url =
-          "${widget.proxyURL}https://maps.googleapis.com/maps/api/place/details/json?placeid=${prediction.placeId}&key=${widget.googleAPIKey}";
+          "${prefix}https://maps.googleapis.com/maps/api/place/details/json?placeid=${prediction.placeId}&key=${widget.googleAPIKey}";
       final response = await _dio.get(
         url,
       );

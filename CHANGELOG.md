@@ -1,5 +1,9 @@
 # Changelog 🪵
 
+## 0.1.1
+
+* [Fix]: Fixed a bug where the Google API Url would not be correctly built if no proxy URL was provided.
+
 ## 0.1.0
 
 * [Add]: Added compatibility for Flutter Web 🌐. Just pass the ```GooglePlacesAutoCompleteTextFormField``` a proxy URL and you're good to go!
