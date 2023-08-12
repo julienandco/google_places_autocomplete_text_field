@@ -62,6 +62,7 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   final bool enableIMEPersonalizedLearning;
   final MouseCursor? mouseCursor;
   final EditableTextContextMenuBuilder? contextMenuBuilder;
+  final String? Function(String?)? validator;
 
   /// Specific to this package
   final InputDecoration? inputDecoration;
@@ -140,6 +141,7 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.enableIMEPersonalizedLearning = true,
     this.mouseCursor,
     this.contextMenuBuilder,
+    this.validator,
   });
 
   @override
@@ -236,6 +238,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
         enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
         mouseCursor: widget.mouseCursor,
         contextMenuBuilder: widget.contextMenuBuilder,
+        validator: widget.validator,
       ),
     );
   }

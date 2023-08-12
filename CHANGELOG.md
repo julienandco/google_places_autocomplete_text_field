@@ -1,5 +1,10 @@
 # Changelog 🪵
 
+## 0.1.2
+
+* [Add]: New argument ```validator``` now you can validate the field if it's used inside the Form widget. More information is available in the example.
+* [Update]: Example updated.
+
 ## 0.1.1
 
 * [Fix]: Fixed a bug where the Google API Url would not be correctly built if no proxy URL was provided.
