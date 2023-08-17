@@ -17,12 +17,12 @@ dependencies:
         textEditingController: controller,
         googleAPIKey: "YOUR_GOOGLE_API_KEY",
         proxyURL: "https://your-proxy.com/", // only needed if you build for the web
-        debounceTime: 400 // defaults to 600 ms,
+        debounceTime: 400, // defaults to 600 ms
         countries: ["de"], // optional, by default the list is empty (no restrictions)
         isLatLngRequired: true, // if you require the coordinates from the place details
         getPlaceDetailWithLatLng: (prediction) {
          // this method will return latlng with place detail
-        print("placeDetails" + prediction.lng.toString());
+        print("Co-ordinates: (" + prediction.lat.toString() + "," +prediction.lng.toString() + ")");
         }, // this callback is called when isLatLngRequired is true
         itmClick: (prediction) {
          controller.text = prediction.description;
