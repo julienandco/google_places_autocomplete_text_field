@@ -22,7 +22,7 @@ dependencies:
         isLatLngRequired: true, // if you require the coordinates from the place details
         getPlaceDetailWithLatLng: (prediction) {
          // this method will return latlng with place detail
-        print("Co-ordinates: (" + prediction.lat.toString() + "," +prediction.lng.toString() + ")");
+        print("Coordinates: (${prediction.lat},${prediction.lng})");
         }, // this callback is called when isLatLngRequired is true
         itmClick: (prediction) {
          controller.text = prediction.description;
