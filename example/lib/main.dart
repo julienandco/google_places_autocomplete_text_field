@@ -16,7 +16,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Google Places Autocomplete Demo'),
+      home: const MyHomePage(
+        title: 'Google Places Autocomplete Demo',
+      ),
     );
   }
 }
@@ -57,13 +59,19 @@ class _MyHomePageState extends State<MyHomePage> {
               child: GooglePlacesAutoCompleteTextFormField(
                 textEditingController: _textController,
                 googleAPIKey: _yourGoogleAPIKey,
+                decoration: const InputDecoration(
+                  hintText: 'Enter your address',
+                  labelText: 'Address',
+                  labelStyle: TextStyle(color: Colors.purple),
+                  border: OutlineInputBorder(),
+                ),
                 validator: (value) {
                   if (value!.isEmpty) {
                     return 'Please enter some text';
                   }
                   return null;
                 },
-                // proxyURL: _yourProxyURL, //
+                // proxyURL: _yourProxyURL,
                 maxLines: 1,
                 overlayContainer: (child) => Material(
                   elevation: 1.0,
