@@ -65,7 +65,6 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   final String? Function(String?)? validator;
 
   /// Specific to this package
-  final InputDecoration? inputDecoration;
   final ItemClick? itmClick;
   final GetPlaceDetailswWithLatLng? getPlaceDetailWithLatLng;
   final bool isLatLngRequired;
@@ -83,7 +82,6 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     required this.textEditingController,
     required this.googleAPIKey,
     this.debounceTime = 600,
-    this.inputDecoration,
     this.itmClick,
     this.isLatLngRequired = true,
     this.countries = const [],
@@ -189,7 +187,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
         controller: widget.textEditingController,
         initialValue: widget.initialValue,
         focusNode: _focus,
-        decoration: widget.inputDecoration,
+        decoration: widget.decoration,
         keyboardType: widget.keyboardType,
         textCapitalization: widget.textCapitalization,
         textInputAction: widget.textInputAction,
