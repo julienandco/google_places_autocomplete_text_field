@@ -9,6 +9,10 @@ class PlaceDetails {
     status = json['status'];
   }
 
+  PlaceDetails.fromJsonNewApi(Map<String, dynamic> json) {
+    result = Result.fromJsonNewApi(json);
+  }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
 
@@ -83,6 +87,33 @@ class Result {
     website = json['website'];
   }
 
+  Result.fromJsonNewApi(Map<String, dynamic> json) {
+    if (json['addressComponents'] != null) {
+      addressComponents = [];
+      json['addressComponents'].forEach((v) {
+        addressComponents!.add(AddressComponents.fromJson(v));
+      });
+    }
+    adrAddress = json['adrFormatAddress'];
+    formattedAddress = json['formattedAddress'];
+    icon = json['iconMaskBaseUri'];
+    name = json['name'];
+    geometry = json['location'] != null
+        ? Geometry.fromJsonNewApi(json['location'])
+        : null;
+    if (json['photos'] != null) {
+      photos = [];
+      json['photos'].forEach((v) {
+        photos!.add(Photos.fromJsonNewApi(v));
+      });
+    }
+    placeId = json['placeId'];
+    types = json['types'].cast<String>();
+    url = json['googleMapsUri'];
+    utcOffset = json['utcOffsetMinutes'];
+    website = json['websiteUri'];
+  }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (addressComponents != null) {
@@ -146,6 +177,10 @@ class Geometry {
         json['viewport'] != null ? Viewport.fromJson(json['viewport']) : null;
   }
 
+  Geometry.fromJsonNewApi(Map<String, dynamic> json) {
+    location = Location.fromJsonNewApi(json);
+  }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (location != null) {
@@ -167,6 +202,11 @@ class Location {
   Location.fromJson(Map<String, dynamic> json) {
     lat = json['lat'];
     lng = json['lng'];
+  }
+
+  Location.fromJsonNewApi(Map<String, dynamic> json) {
+    lat = json['latitude'];
+    lng = json['longitude'];
   }
 
   Map<String, dynamic> toJson() {
@@ -215,6 +255,13 @@ class Photos {
     htmlAttributions = json['html_attributions'].cast<String>();
     photoReference = json['photo_reference'];
     width = json['width'];
+  }
+
+  Photos.fromJsonNewApi(Map<String, dynamic> json) {
+    height = json['heightPx'];
+    htmlAttributions = json['authorAttributions'].cast<String>();
+    photoReference = json['name'];
+    width = json['widthPx'];
   }
 
   Map<String, dynamic> toJson() {

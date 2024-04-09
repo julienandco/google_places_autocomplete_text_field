@@ -14,6 +14,17 @@ class PlacesAutocompleteResponse {
     status = json['status'];
   }
 
+  PlacesAutocompleteResponse.fromJsonNewApi(Map<String, dynamic> json) {
+    if (json['suggestions'] != null && json['suggestions'].length > 0) {
+      predictions = [];
+      json['suggestions'].forEach((v) {
+        if (v['placePrediction'] != null) {
+          predictions!.add(Prediction.fromJsonNewApi(v['placePrediction']));
+        }
+      });
+    }
+  }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (predictions != null) {
@@ -73,6 +84,17 @@ class Prediction {
     lng = json['lng'];
   }
 
+  Prediction.fromJsonNewApi(Map<String, dynamic> json) {
+    placeId = json['placeId'];
+    description = json['text'] != null ? json['text']['text'] : null;
+    structuredFormatting = json['structuredFormat'] != null
+        ? StructuredFormatting.fromJsonNewApi(json['structuredFormat'])
+        : null;
+    types = json['types'].cast<String>();
+    lat = json['lat'];
+    lng = json['lng'];
+  }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['description'] = description;
@@ -125,8 +147,13 @@ class StructuredFormatting {
 
   StructuredFormatting.fromJson(Map<String, dynamic> json) {
     mainText = json['main_text'];
-
     secondaryText = json['secondary_text'];
+  }
+
+  StructuredFormatting.fromJsonNewApi(Map<String, dynamic> json) {
+    mainText = json['mainText'] != null ? json['mainText']['text'] : null;
+    secondaryText =
+        json['secondaryText'] != null ? json['secondaryText']['text'] : null;
   }
 
   Map<String, dynamic> toJson() {
