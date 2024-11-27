@@ -3,10 +3,9 @@ library google_places_autocomplete_text_field;
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
@@ -79,6 +78,9 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   final int? minInputLength;
   final bool useSessionToken;
 
+  /// The maximum height of the suggestions list
+  final double maxHeight;
+
   const GooglePlacesAutoCompleteTextFormField({
     super.key,
 
@@ -146,6 +148,7 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.mouseCursor,
     this.contextMenuBuilder,
     this.validator,
+    this.maxHeight = 200,
   });
 
   @override
@@ -332,26 +335,31 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   }
 
   Widget get _overlayChild {
-    return ListView.builder(
-      padding: EdgeInsets.zero,
-      shrinkWrap: true,
-      itemCount: allPredictions.length,
-      itemBuilder: (BuildContext context, int index) => InkWell(
-        onTap: () {
-          if (index < allPredictions.length) {
-            widget.itmClick!(allPredictions[index]);
-            if (!widget.isLatLngRequired) return;
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: widget.maxHeight,
+      ),
+      child: ListView.builder(
+        padding: EdgeInsets.zero,
+        shrinkWrap: true,
+        itemCount: allPredictions.length,
+        itemBuilder: (BuildContext context, int index) => InkWell(
+          onTap: () {
+            if (index < allPredictions.length) {
+              widget.itmClick!(allPredictions[index]);
+              if (!widget.isLatLngRequired) return;
 
-            getPlaceDetailsFromPlaceId(allPredictions[index]);
+              getPlaceDetailsFromPlaceId(allPredictions[index]);
 
-            removeOverlay();
-          }
-        },
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          child: Text(
-            allPredictions[index].description!,
-            style: widget.predictionsStyle ?? widget.style,
+              removeOverlay();
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            child: Text(
+              allPredictions[index].description!,
+              style: widget.predictionsStyle ?? widget.style,
+            ),
           ),
         ),
       ),
