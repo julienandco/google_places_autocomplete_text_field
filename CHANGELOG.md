@@ -5,7 +5,6 @@
 All the changes marked with (*) are the work of [@lucaantonelli](https://github.com/lucaantonelli), thank you a lot!
 
 * [Breaking]: Implement new Places API (*)
-* [Breaking]: Fix typo: `GetPlaceDetailswWithLatLng` -> `GetPlaceDetailsWithLatLng` (*)
 * [Add]: Add a minimum input length (*)
 * [Add]: Add the possibility to use a session token (thanks for the first implementation [@lucaantonelli](https://github.com/lucaantonelli)!)
 * [Add]: Add the `maxHeight` parameter to manipulate the overlay height (special thanks to [@Muhammed-Ayad](https://github.com/Muhammed-Ayad)!)
@@ -13,8 +12,12 @@ All the changes marked with (*) are the work of [@lucaantonelli](https://github.
 * [Chore]: Added doc comments to `GooglePlacesAutoCompleteTextFormField`
 * [Breaking]: Rename `itmClick` to `onSuggestionClicked`
 * [Breaking]: Rename `isLatLngRequired` to `fetchCoordinates`
+* [Breaking]: Rename `overlayContainer` to `overlayContainerBuilder`
+* [Breaking]: Remove unnecessary typedefs: `GetPlaceDetailswWithLatLng`, `ItemClick` and `OverlayContainer`
 * [Fix]: Make the `TextEditingController` nullable and ensure the `initialValue` property can be used (thanks for finding this bug [@trusilosv](https://github.com/trusilosv)!)
 * [Add]: Add the `fetchSuggestionsForInitialValue` parameter to instantly fetch suggestions when an initial value is given.
+* [Refactor]: Extract the Google Places API logic into an own class
+* [Fix]: Make sure the overlay adapts to multiline input (thanks for finding this bug [@iamdiogo](https://github.com/iamdiogo)!)
 
 ## 0.1.3
 
