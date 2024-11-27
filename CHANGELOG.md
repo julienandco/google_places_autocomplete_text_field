@@ -12,7 +12,8 @@ All the changes marked with (*) are the work of [@lucaantonelli](https://github.
 * [Chore]: Added doc comments to `GooglePlacesAutoCompleteTextFormField`
 * [Breaking]: Rename `itmClick` to `onSuggestionClicked`
 * [Breaking]: Rename `isLatLngRequired` to `fetchCoordinates`
-* [Breaking]: Remove unnecessary typedefs: `GetPlaceDetailswWithLatLng` and `ItemClick`
+* [Breaking]: Rename `overlayContainer` to `overlayContainerBuilder`
+* [Breaking]: Remove unnecessary typedefs: `GetPlaceDetailswWithLatLng`, `ItemClick` and `OverlayContainer`
 * [Fix]: Make the `TextEditingController` nullable and ensure the `initialValue` property can be used (thanks for finding this bug [@trusilosv](https://github.com/trusilosv)!)
 * [Add]: Add the `fetchSuggestionsForInitialValue` parameter to instantly fetch suggestions when an initial value is given.
 * [Refactor]: Extract the Google Places API logic into an own class

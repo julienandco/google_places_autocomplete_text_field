@@ -3,10 +3,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_places_autocomplete_text_field/src/data/google_places_api.dart';
+import 'package:google_places_autocomplete_text_field/google_places_autocomplete_text_field.dart';
 import 'package:rxdart/rxdart.dart';
-
-import 'package:google_places_autocomplete_text_field/src/model/prediction.dart';
 
 /// {@template google_places_autocomplete_text_form_field}
 /// A [TextFormField] that provides autocompletion suggestions based on the
@@ -24,7 +22,7 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.countries = const [],
     this.onPlaceDetailsWithCoordinatesReceived,
     this.predictionsStyle,
-    this.overlayContainer,
+    this.overlayContainerBuilder,
     this.proxyURL,
     this.minInputLength = 0,
     this.sessionToken,
@@ -134,7 +132,7 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
 
   /// The widget that is shown as an overlay to the text form field. If this is
   /// null, a default Material widget will be used.
-  final OverlayContainer? overlayContainer;
+  final Widget Function(Widget overlayChild)? overlayContainerBuilder;
 
   /// The URL of the proxy server that is used to send the requests to the
   /// Google Places API. If this is null, the requests will be sent directly to
@@ -151,7 +149,7 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   final String? sessionToken;
 
   /// The maximum height of the suggestions list [OverlayContainer]. If a custom
-  /// [overlayContainer] is provided, this value will be ignored.
+  /// [overlayContainerBuilder] is provided, this value will be ignored.
   final double maxHeight;
 
   // The following properties are the same as the ones in the TextFormField
@@ -335,6 +333,18 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     allPredictions.addAll(predictions);
   }
 
+  Future<void> getPlaceDetailsFromPlaceId(Prediction prediction) async {
+    final predictionWithCoordinates = await _api.fetchCoordinatesForPrediction(
+      prediction: prediction,
+      googleAPIKey: widget.googleAPIKey,
+      proxyUrl: widget.proxyURL ?? "",
+      sessionToken: widget.sessionToken,
+    );
+    if (predictionWithCoordinates == null) return;
+    widget.onPlaceDetailsWithCoordinatesReceived
+        ?.call(predictionWithCoordinates);
+  }
+
   Future<void> textChanged(String text) async {
     final overlay = Overlay.of(context);
     getLocation(text).then(
@@ -361,7 +371,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
             showWhenUnlinked: false,
             link: _layerLink,
             offset: Offset(0.0, size.height + 5.0),
-            child: widget.overlayContainer?.call(_overlayChild) ??
+            child: widget.overlayContainerBuilder?.call(_overlayChild) ??
                 Material(
                   elevation: 1.0,
                   child: Container(
@@ -411,18 +421,4 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     Overlay.of(context).insert(_overlayEntry!);
     _overlayEntry!.markNeedsBuild();
   }
-
-  Future<void> getPlaceDetailsFromPlaceId(Prediction prediction) async {
-    final predictionWithCoordinates = await _api.fetchCoordinatesForPrediction(
-      prediction: prediction,
-      googleAPIKey: widget.googleAPIKey,
-      proxyUrl: widget.proxyURL ?? "",
-      sessionToken: widget.sessionToken,
-    );
-    if (predictionWithCoordinates == null) return;
-    widget.onPlaceDetailsWithCoordinatesReceived
-        ?.call(predictionWithCoordinates);
-  }
 }
-
-typedef OverlayContainer = Widget Function(Widget overlayChild);
