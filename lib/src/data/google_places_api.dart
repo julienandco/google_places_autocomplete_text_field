@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:google_places_autocomplete_text_field/model/place_details.dart';
-import 'package:google_places_autocomplete_text_field/model/prediction.dart';
+import 'package:google_places_autocomplete_text_field/src/model/place_details.dart';
+import 'package:google_places_autocomplete_text_field/src/model/prediction.dart';
 
 /// {@template google_places_api}
 /// Interface for Google Places API.
