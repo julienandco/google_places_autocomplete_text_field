@@ -79,11 +79,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   borderRadius: BorderRadius.circular(12),
                   child: child,
                 ),
-                getPlaceDetailWithLatLng: (prediction) {
+                getPlaceDetailsWithLatLng: (prediction) {
                   print('placeDetails${prediction.lng}');
                 },
                 itmClick: (Prediction prediction) =>
                     _textController.text = prediction.description!,
+                minInputLength: 3,
+                useSessionToken: false,
               ),
             ),
             const SizedBox(height: 24),

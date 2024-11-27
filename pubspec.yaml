@@ -1,6 +1,6 @@
 name: google_places_autocomplete_text_field
 description: A fully customizable Google Places autocomplete TextFormField for Flutter iOS, Android and Web.
-version: 0.1.3
+version: 1.0.0
 homepage: https://github.com/julienandco/google_places_autocomplete_text_field
 
 environment:
@@ -10,7 +10,8 @@ dependencies:
   flutter:
     sdk: flutter
   dio: ^5.1.1
-  rxdart: ">=0.27.7 <0.29.0"
+  rxdart: ^0.27.7
+  uuid: ^4.3.3
 
 dev_dependencies:
   flutter_test:

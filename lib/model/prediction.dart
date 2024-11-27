@@ -2,25 +2,20 @@ class PlacesAutocompleteResponse {
   List<Prediction>? predictions;
   String? status;
 
-  PlacesAutocompleteResponse({this.predictions, this.status});
+  PlacesAutocompleteResponse({
+    this.predictions,
+    this.status,
+  });
 
   PlacesAutocompleteResponse.fromJson(Map<String, dynamic> json) {
-    if (json['predictions'] != null) {
+    if (json['suggestions'] != null && json['suggestions'].length > 0) {
       predictions = [];
-      json['predictions'].forEach((v) {
-        predictions!.add(Prediction.fromJson(v));
+      json['suggestions'].forEach((v) {
+        if (v['placePrediction'] != null) {
+          predictions!.add(Prediction.fromJson(v['placePrediction']));
+        }
       });
     }
-    status = json['status'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    if (predictions != null) {
-      data['predictions'] = predictions!.map((v) => v.toJson()).toList();
-    }
-    data['status'] = status;
-    return data;
   }
 }
 
@@ -36,64 +31,28 @@ class Prediction {
   String? lat;
   String? lng;
 
-  Prediction(
-      {this.description,
-      this.id,
-      this.matchedSubstrings,
-      this.placeId,
-      this.reference,
-      this.structuredFormatting,
-      this.terms,
-      this.types,
-      this.lat,
-      this.lng});
+  Prediction({
+    this.description,
+    this.id,
+    this.matchedSubstrings,
+    this.placeId,
+    this.reference,
+    this.structuredFormatting,
+    this.terms,
+    this.types,
+    this.lat,
+    this.lng,
+  });
 
   Prediction.fromJson(Map<String, dynamic> json) {
-    description = json['description'];
-    id = json['id'];
-    if (json['matched_substrings'] != null) {
-      matchedSubstrings = [];
-      json['matched_substrings'].forEach((v) {
-        matchedSubstrings!.add(MatchedSubstrings.fromJson(v));
-      });
-    }
-    placeId = json['place_id'];
-    reference = json['reference'];
-    structuredFormatting = json['structured_formatting'] != null
-        ? StructuredFormatting.fromJson(json['structured_formatting'])
+    placeId = json['placeId'];
+    description = json['text'] != null ? json['text']['text'] : null;
+    structuredFormatting = json['structuredFormat'] != null
+        ? StructuredFormatting.fromJson(json['structuredFormat'])
         : null;
-    if (json['terms'] != null) {
-      terms = [];
-      json['terms'].forEach((v) {
-        terms!.add(Terms.fromJson(v));
-      });
-    }
     types = json['types'].cast<String>();
     lat = json['lat'];
     lng = json['lng'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['description'] = description;
-    data['id'] = id;
-    if (matchedSubstrings != null) {
-      data['matched_substrings'] =
-          matchedSubstrings!.map((v) => v.toJson()).toList();
-    }
-    data['place_id'] = placeId;
-    data['reference'] = reference;
-    if (structuredFormatting != null) {
-      data['structured_formatting'] = structuredFormatting!.toJson();
-    }
-    if (terms != null) {
-      data['terms'] = terms!.map((v) => v.toJson()).toList();
-    }
-    data['types'] = types;
-    data['lat'] = lat;
-    data['lng'] = lng;
-
-    return data;
   }
 }
 
@@ -107,13 +66,6 @@ class MatchedSubstrings {
     length = json['length'];
     offset = json['offset'];
   }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['length'] = length;
-    data['offset'] = offset;
-    return data;
-  }
 }
 
 class StructuredFormatting {
@@ -124,16 +76,9 @@ class StructuredFormatting {
   StructuredFormatting({this.mainText, this.secondaryText});
 
   StructuredFormatting.fromJson(Map<String, dynamic> json) {
-    mainText = json['main_text'];
-
-    secondaryText = json['secondary_text'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['main_text'] = mainText;
-    data['secondary_text'] = secondaryText;
-    return data;
+    mainText = json['mainText'] != null ? json['mainText']['text'] : null;
+    secondaryText =
+        json['secondaryText'] != null ? json['secondaryText']['text'] : null;
   }
 }
 
@@ -146,12 +91,5 @@ class Terms {
   Terms.fromJson(Map<String, dynamic> json) {
     offset = json['offset'];
     value = json['value'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['offset'] = offset;
-    data['value'] = value;
-    return data;
   }
 }

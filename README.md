@@ -1,5 +1,7 @@
 # google_places_autocomplete_text_field
 
+This Flutter package helps you build a TextField that provides autocompletion suggestions from the [new Google Places API](https://developers.google.com/maps/documentation/places/web-service/op-overview).
+
 ## Add the dependency to pubspec.yml ➕
 
 ```yaml
@@ -20,7 +22,7 @@ dependencies:
         debounceTime: 400, // defaults to 600 ms
         countries: ["de"], // optional, by default the list is empty (no restrictions)
         isLatLngRequired: true, // if you require the coordinates from the place details
-        getPlaceDetailWithLatLng: (prediction) {
+        getPlaceDetailsWithLatLng: (prediction) {
          // this method will return latlng with place detail
         print("Coordinates: (${prediction.lat},${prediction.lng})");
         }, // this callback is called when isLatLngRequired is true
