@@ -20,8 +20,8 @@ import 'package:google_places_autocomplete_text_field/model/prediction.dart';
 class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   /// {@macro google_places_autocomplete_text_form_field}
   const GooglePlacesAutoCompleteTextFormField({
-    required this.textEditingController,
     required this.googleAPIKey,
+    this.textEditingController,
     this.debounceTime = 600,
     this.onSuggestionClicked,
     this.fetchCoordinates = true,
@@ -33,6 +33,7 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.minInputLength = 0,
     this.sessionToken,
     this.initialValue,
+    this.fetchSuggestionsForInitialValue = false,
     this.focusNode,
     this.decoration,
     this.keyboardType,
@@ -93,13 +94,19 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   /// set inside the controller.
   final String? initialValue;
 
+  /// Whether the suggestions should be fetched for the initial value. If this
+  /// is set to true, the suggestions will be fetched immediately, as soon as
+  /// the widget is built. The suggestions will only be fetched if the initial
+  /// value is not null.
+  final bool fetchSuggestionsForInitialValue;
+
   /// The FocusNode that controls this text form field. If this is null, a new
   /// FocusNode will be created.
   final FocusNode? focusNode;
 
   /// The TextEditingController that controls this text form field. If this is
   /// null, no TextEditingController will be created.
-  final TextEditingController textEditingController;
+  final TextEditingController? textEditingController;
 
   /// The callback executed when the user clicks on a suggestion. The prediction
   /// that was clicked will be passed as an argument.
@@ -237,6 +244,14 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       });
     }
 
+    if (widget.initialValue != null && widget.fetchSuggestionsForInitialValue) {
+      subject.add(widget.initialValue!);
+    }
+
+    if (widget.initialValue != null && widget.textEditingController != null) {
+      widget.textEditingController!.text = widget.initialValue!;
+    }
+
     super.initState();
   }
 
@@ -246,7 +261,8 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       link: _layerLink,
       child: TextFormField(
         controller: widget.textEditingController,
-        initialValue: widget.initialValue,
+        initialValue:
+            widget.textEditingController != null ? null : widget.initialValue,
         focusNode: _focus,
         decoration: widget.decoration,
         keyboardType: widget.keyboardType,
