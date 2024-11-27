@@ -1,15 +1,13 @@
 library google_places_autocomplete_text_field;
 
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_places_autocomplete_text_field/data/google_places_api.dart';
 import 'package:rxdart/rxdart.dart';
 
-import 'package:google_places_autocomplete_text_field/model/place_details.dart';
 import 'package:google_places_autocomplete_text_field/model/prediction.dart';
 
 /// {@template google_places_autocomplete_text_form_field}
@@ -26,7 +24,7 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.onSuggestionClicked,
     this.fetchCoordinates = true,
     this.countries = const [],
-    this.getPlaceDetailsWithLatLng,
+    this.onPlaceDetailsWithCoordinatesReceived,
     this.predictionsStyle,
     this.overlayContainer,
     this.proxyURL,
@@ -84,10 +82,7 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.validator,
     this.maxHeight = 200,
     super.key,
-  }) : assert(
-          !fetchCoordinates || getPlaceDetailsWithLatLng != null,
-          'If fetchCoordinates is set to true, getPlaceDetailsWithLatLng must not be null',
-        );
+  });
 
   /// The initial value to be held inside the text form field. If this is not
   /// null and [textEditingController] is not null as well, this value will be
@@ -110,16 +105,17 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
 
   /// The callback executed when the user clicks on a suggestion. The prediction
   /// that was clicked will be passed as an argument.
-  final ItemClick? onSuggestionClicked;
+  final void Function(Prediction prediction)? onSuggestionClicked;
 
-  /// The callback that is called to retreive the place details with the
-  /// coordinates. Needs to be not null when [fetchCoordinates] is set to true.
-  /// Otherwise the place details are returned without coordinate
-  /// information.
-  final GetPlaceDetailsWithLatLng? getPlaceDetailsWithLatLng;
+  /// The callback that is called as soon as the place details with the
+  /// coordinates are received.
+  final void Function(Prediction prediction)?
+      onPlaceDetailsWithCoordinatesReceived;
 
   /// Whether the coordinates should be fetched for the selected place as well.
-  /// If set to true, [getPlaceDetailsWithLatLng] needs to be not null.
+  /// Otherwise the place details are returned without coordinate
+  /// information. If set to true, [onPlaceDetailsWithCoordinatesReceived] needs
+  /// to be not null.
   final bool fetchCoordinates;
 
   /// The Google API key that is used to authenticate the requests to the
@@ -218,17 +214,17 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
 class _GooglePlacesAutoCompleteTextFormFieldState
     extends State<GooglePlacesAutoCompleteTextFormField> {
   final subject = PublishSubject<String>();
+  late GooglePlacesApi _api;
   OverlayEntry? _overlayEntry;
   List<Prediction> allPredictions = [];
 
   final LayerLink _layerLink = LayerLink();
-  bool isSearched = false;
 
-  final Dio _dio = Dio();
   late FocusNode _focus;
 
   @override
   void initState() {
+    _api = GooglePlacesApi();
     subject.stream
         .distinct()
         .debounceTime(Duration(milliseconds: widget.debounceTime))
@@ -325,37 +321,20 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       return;
     }
 
-    final prefix = widget.proxyURL ?? "";
-    PlacesAutocompleteResponse subscriptionResponse;
-
-    String url =
-        "${prefix}https://places.googleapis.com/v1/places:autocomplete";
-
-    Map<String, dynamic> requestBody = {"input": text};
-
-    if (widget.countries != null) {
-      requestBody["includedRegionCodes"] = widget.countries;
-    }
-    if (widget.sessionToken != null) {
-      requestBody["sessionToken"] = widget.sessionToken;
-    }
-    Options options = Options(
-      headers: {"X-Goog-Api-Key": widget.googleAPIKey},
+    final result = await _api.getSuggestionsForInput(
+      input: text,
+      googleAPIKey: widget.googleAPIKey,
+      countries: widget.countries ?? [],
+      sessionToken: widget.sessionToken,
+      proxyUrl: widget.proxyURL ?? "",
     );
 
-    try {
-      final response =
-          await _dio.post(url, options: options, data: jsonEncode(requestBody));
-      subscriptionResponse = PlacesAutocompleteResponse.fromJson(response.data);
+    if (result == null) return;
+    final predictions = result.predictions;
+    if (predictions == null || predictions.isEmpty) return;
 
-      isSearched = false;
-      if (subscriptionResponse.predictions!.isNotEmpty) {
-        allPredictions.clear();
-        allPredictions.addAll(subscriptionResponse.predictions!);
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    }
+    allPredictions.clear();
+    allPredictions.addAll(predictions);
   }
 
   Future<void> textChanged(String text) async {
@@ -436,34 +415,16 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   }
 
   Future<void> getPlaceDetailsFromPlaceId(Prediction prediction) async {
-    try {
-      final prefix = widget.proxyURL ?? "";
-
-      String url =
-          "${prefix}https://places.googleapis.com/v1/places/${prediction.placeId}?fields=*&key=${widget.googleAPIKey}";
-      if (widget.sessionToken != null) {
-        url += "&sessionToken=${widget.sessionToken}";
-      }
-      final response = await _dio.get(url);
-
-      final placeDetails = PlaceDetails.fromJson(response.data);
-
-      prediction.lat = placeDetails.result!.geometry!.location!.lat.toString();
-      prediction.lng = placeDetails.result!.geometry!.location!.lng.toString();
-
-      widget.getPlaceDetailsWithLatLng!(prediction);
-    } catch (e) {
-      rethrow;
-    }
+    final predictionWithCoordinates = await _api.fetchCoordinatesForPrediction(
+      prediction: prediction,
+      googleAPIKey: widget.googleAPIKey,
+      proxyUrl: widget.proxyURL ?? "",
+      sessionToken: widget.sessionToken,
+    );
+    if (predictionWithCoordinates == null) return;
+    widget.onPlaceDetailsWithCoordinatesReceived
+        ?.call(predictionWithCoordinates);
   }
 }
 
-PlacesAutocompleteResponse parseResponse(Map responseBody) =>
-    PlacesAutocompleteResponse.fromJson(responseBody as Map<String, dynamic>);
-
-PlaceDetails parsePlaceDetailMap(Map responseBody) =>
-    PlaceDetails.fromJson(responseBody as Map<String, dynamic>);
-
-typedef ItemClick = void Function(Prediction prediction);
-typedef GetPlaceDetailsWithLatLng = void Function(Prediction prediction);
 typedef OverlayContainer = Widget Function(Widget overlayChild);
