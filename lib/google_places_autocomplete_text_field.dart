@@ -8,97 +8,30 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:uuid/uuid.dart';
 
 import 'package:google_places_autocomplete_text_field/model/place_details.dart';
 import 'package:google_places_autocomplete_text_field/model/prediction.dart';
 
+/// {@template google_places_autocomplete_text_form_field}
+/// A [TextFormField] that provides autocompletion suggestions based on the
+/// user's input, using the new Google Places API
+/// (https://developers.google.com/maps/documentation/places/web-service/op-overview).
+/// {@endtemplate}
 class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
-  final String? initialValue;
-  final FocusNode? focusNode;
-  final TextEditingController textEditingController;
-  final InputDecoration? decoration;
-  final TextInputType? keyboardType;
-  final TextCapitalization textCapitalization;
-  final TextInputAction? textInputAction;
-  final TextStyle? style;
-  final StrutStyle? strutStyle;
-  final TextDirection? textDirection;
-  final TextAlign textAlign;
-  final TextAlignVertical? textAlignVertical;
-  final bool autofocus;
-  final bool readOnly;
-  final bool? showCursor;
-  final String obscuringCharacter;
-  final bool obscureText;
-  final bool autocorrect;
-  final SmartDashesType? smartDashesType;
-  final SmartQuotesType? smartQuotesType;
-  final bool enableSuggestions;
-  final MaxLengthEnforcement? maxLengthEnforcement;
-  final int? maxLines;
-  final int? minLines;
-  final bool expands;
-  final int? maxLength;
-  final ValueChanged<String>? onChanged;
-  final GestureTapCallback? onTap;
-  final TapRegionCallback? onTapOutside;
-  final VoidCallback? onEditingComplete;
-  final ValueChanged<String>? onFieldSubmitted;
-  final List<TextInputFormatter>? inputFormatters;
-  final bool? enabled;
-  final double cursorWidth;
-  final double? cursorHeight;
-  final Radius? cursorRadius;
-  final Color? cursorColor;
-  final Brightness? keyboardAppearance;
-  final EdgeInsets scrollPadding;
-  final bool? enableInteractiveSelection;
-  final TextSelectionControls? selectionControls;
-  final InputCounterWidgetBuilder? buildCounter;
-  final ScrollPhysics? scrollPhysics;
-  final Iterable<String>? autofillHints;
-  final AutovalidateMode? autovalidateMode;
-  final ScrollController? scrollController;
-  final bool enableIMEPersonalizedLearning;
-  final MouseCursor? mouseCursor;
-  final EditableTextContextMenuBuilder? contextMenuBuilder;
-  final String? Function(String?)? validator;
-
-  /// Specific to this package
-  final ItemClick? itmClick;
-  final GetPlaceDetailsWithLatLng? getPlaceDetailsWithLatLng;
-  final bool isLatLngRequired;
-  final String googleAPIKey;
-  final int debounceTime;
-  final List<String>? countries;
-  final TextStyle? predictionsStyle;
-  final OverlayContainer? overlayContainer;
-  final String? proxyURL;
-  final int? minInputLength;
-  final bool useSessionToken;
-
-  /// The maximum height of the suggestions list
-  final double maxHeight;
-
+  /// {@macro google_places_autocomplete_text_form_field}
   const GooglePlacesAutoCompleteTextFormField({
-    super.key,
-
-    ///// SPECIFIC TO THIS PACKAGE
     required this.textEditingController,
     required this.googleAPIKey,
     this.debounceTime = 600,
-    this.itmClick,
-    this.isLatLngRequired = true,
+    this.onSuggestionClicked,
+    this.fetchCoordinates = true,
     this.countries = const [],
     this.getPlaceDetailsWithLatLng,
     this.predictionsStyle,
     this.overlayContainer,
     this.proxyURL,
-    this.minInputLength,
-    this.useSessionToken = true,
-
-    ////// DEFAULT TEXT FORM INPUTS
+    this.minInputLength = 0,
+    this.sessionToken,
     this.initialValue,
     this.focusNode,
     this.decoration,
@@ -149,7 +82,126 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.contextMenuBuilder,
     this.validator,
     this.maxHeight = 200,
-  });
+    super.key,
+  }) : assert(
+          !fetchCoordinates || getPlaceDetailsWithLatLng != null,
+          'If fetchCoordinates is set to true, getPlaceDetailsWithLatLng must not be null',
+        );
+
+  /// The initial value to be held inside the text form field. If this is not
+  /// null and [textEditingController] is not null as well, this value will be
+  /// set inside the controller.
+  final String? initialValue;
+
+  /// The FocusNode that controls this text form field. If this is null, a new
+  /// FocusNode will be created.
+  final FocusNode? focusNode;
+
+  /// The TextEditingController that controls this text form field. If this is
+  /// null, no TextEditingController will be created.
+  final TextEditingController textEditingController;
+
+  /// The callback executed when the user clicks on a suggestion. The prediction
+  /// that was clicked will be passed as an argument.
+  final ItemClick? onSuggestionClicked;
+
+  /// The callback that is called to retreive the place details with the
+  /// coordinates. Needs to be not null when [fetchCoordinates] is set to true.
+  /// Otherwise the place details are returned without coordinate
+  /// information.
+  final GetPlaceDetailsWithLatLng? getPlaceDetailsWithLatLng;
+
+  /// Whether the coordinates should be fetched for the selected place as well.
+  /// If set to true, [getPlaceDetailsWithLatLng] needs to be not null.
+  final bool fetchCoordinates;
+
+  /// The Google API key that is used to authenticate the requests to the
+  /// Google Places API.
+  final String googleAPIKey;
+
+  /// The time in milliseconds that the widget waits before sending a request
+  /// to the Google Places API. This is used to prevent too many requests from
+  /// being sent.
+  final int debounceTime;
+
+  /// The list of countries that the suggestions should be limited to. If this
+  /// is null, the suggestions will not be limited to any country.
+  final List<String>? countries;
+
+  /// The texxt style of the predictions that are shown in the suggestions list.
+  final TextStyle? predictionsStyle;
+
+  /// The widget that is shown as an overlay to the text form field. If this is
+  /// null, a default Material widget will be used.
+  final OverlayContainer? overlayContainer;
+
+  /// The URL of the proxy server that is used to send the requests to the
+  /// Google Places API. If this is null, the requests will be sent directly to
+  /// the Google Places API.
+  final String? proxyURL;
+
+  /// The minimum length of the input that is required to send a request to the
+  /// Google Places API. If the input is shorter than this value, no request
+  /// will be sent.
+  final int minInputLength;
+
+  /// The session token to be used for the requests to the Google
+  /// Places API.
+  final String? sessionToken;
+
+  /// The maximum height of the suggestions list [OverlayContainer]. If a custom
+  /// [overlayContainer] is provided, this value will be ignored.
+  final double maxHeight;
+
+  // The following properties are the same as the ones in the TextFormField
+  // widget. They are used to customize the text form field.
+  final InputDecoration? decoration;
+  final TextInputType? keyboardType;
+  final TextCapitalization textCapitalization;
+  final TextInputAction? textInputAction;
+  final TextStyle? style;
+  final StrutStyle? strutStyle;
+  final TextDirection? textDirection;
+  final TextAlign textAlign;
+  final TextAlignVertical? textAlignVertical;
+  final bool autofocus;
+  final bool readOnly;
+  final bool? showCursor;
+  final String obscuringCharacter;
+  final bool obscureText;
+  final bool autocorrect;
+  final SmartDashesType? smartDashesType;
+  final SmartQuotesType? smartQuotesType;
+  final bool enableSuggestions;
+  final MaxLengthEnforcement? maxLengthEnforcement;
+  final int? maxLines;
+  final int? minLines;
+  final bool expands;
+  final int? maxLength;
+  final ValueChanged<String>? onChanged;
+  final GestureTapCallback? onTap;
+  final TapRegionCallback? onTapOutside;
+  final VoidCallback? onEditingComplete;
+  final ValueChanged<String>? onFieldSubmitted;
+  final List<TextInputFormatter>? inputFormatters;
+  final bool? enabled;
+  final double cursorWidth;
+  final double? cursorHeight;
+  final Radius? cursorRadius;
+  final Color? cursorColor;
+  final Brightness? keyboardAppearance;
+  final EdgeInsets scrollPadding;
+  final bool? enableInteractiveSelection;
+  final TextSelectionControls? selectionControls;
+  final InputCounterWidgetBuilder? buildCounter;
+  final ScrollPhysics? scrollPhysics;
+  final Iterable<String>? autofillHints;
+  final AutovalidateMode? autovalidateMode;
+  final ScrollController? scrollController;
+  final bool enableIMEPersonalizedLearning;
+  final MouseCursor? mouseCursor;
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+  final String? Function(String?)? validator;
 
   @override
   State<GooglePlacesAutoCompleteTextFormField> createState() =>
@@ -161,7 +213,6 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   final subject = PublishSubject<String>();
   OverlayEntry? _overlayEntry;
   List<Prediction> allPredictions = [];
-  String? sessionToken;
 
   final LayerLink _layerLink = LayerLink();
   bool isSearched = false;
@@ -252,7 +303,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   }
 
   Future<void> getLocation(String text) async {
-    if (text.isEmpty || text.length < (widget.minInputLength ?? 0)) {
+    if (text.isEmpty || text.length < widget.minInputLength) {
       allPredictions.clear();
       _overlayEntry?.remove();
       return;
@@ -260,11 +311,6 @@ class _GooglePlacesAutoCompleteTextFormFieldState
 
     final prefix = widget.proxyURL ?? "";
     PlacesAutocompleteResponse subscriptionResponse;
-
-    if (widget.useSessionToken && sessionToken == null) {
-      var uuid = const Uuid();
-      sessionToken = widget.useSessionToken ? uuid.v4() : null;
-    }
 
     String url =
         "${prefix}https://places.googleapis.com/v1/places:autocomplete";
@@ -274,8 +320,8 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     if (widget.countries != null) {
       requestBody["includedRegionCodes"] = widget.countries;
     }
-    if (sessionToken != null) {
-      requestBody["sessionToken"] = sessionToken;
+    if (widget.sessionToken != null) {
+      requestBody["sessionToken"] = widget.sessionToken;
     }
     Options options = Options(
       headers: {"X-Goog-Api-Key": widget.googleAPIKey},
@@ -325,7 +371,12 @@ class _GooglePlacesAutoCompleteTextFormFieldState
             child: widget.overlayContainer?.call(_overlayChild) ??
                 Material(
                   elevation: 1.0,
-                  child: _overlayChild,
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxHeight: widget.maxHeight,
+                    ),
+                    child: _overlayChild,
+                  ),
                 ),
           ),
         ),
@@ -335,31 +386,26 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   }
 
   Widget get _overlayChild {
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: widget.maxHeight,
-      ),
-      child: ListView.builder(
-        padding: EdgeInsets.zero,
-        shrinkWrap: true,
-        itemCount: allPredictions.length,
-        itemBuilder: (BuildContext context, int index) => InkWell(
-          onTap: () {
-            if (index < allPredictions.length) {
-              widget.itmClick!(allPredictions[index]);
-              if (!widget.isLatLngRequired) return;
+    return ListView.builder(
+      padding: EdgeInsets.zero,
+      shrinkWrap: true,
+      itemCount: allPredictions.length,
+      itemBuilder: (BuildContext context, int index) => InkWell(
+        onTap: () {
+          if (index < allPredictions.length) {
+            widget.onSuggestionClicked!(allPredictions[index]);
+            if (!widget.fetchCoordinates) return;
 
-              getPlaceDetailsFromPlaceId(allPredictions[index]);
+            getPlaceDetailsFromPlaceId(allPredictions[index]);
 
-              removeOverlay();
-            }
-          },
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            child: Text(
-              allPredictions[index].description!,
-              style: widget.predictionsStyle ?? widget.style,
-            ),
+            removeOverlay();
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          child: Text(
+            allPredictions[index].description!,
+            style: widget.predictionsStyle ?? widget.style,
           ),
         ),
       ),
@@ -379,9 +425,8 @@ class _GooglePlacesAutoCompleteTextFormFieldState
 
       String url =
           "${prefix}https://places.googleapis.com/v1/places/${prediction.placeId}?fields=*&key=${widget.googleAPIKey}";
-      if (sessionToken != null) {
-        url += "&sessionToken=$sessionToken";
-        sessionToken = null; // Reset session token
+      if (widget.sessionToken != null) {
+        url += "&sessionToken=${widget.sessionToken}";
       }
       final response = await _dio.get(url);
 

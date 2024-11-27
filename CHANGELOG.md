@@ -7,9 +7,12 @@ All the changes marked with (*) are the work of [@lucaantonelli](https://github.
 * [Breaking]: Implement new Places API (*)
 * [Breaking]: Fix typo: `GetPlaceDetailswWithLatLng` -> `GetPlaceDetailsWithLatLng` (*)
 * [Add]: Add a minimum input length (*)
-* [Add]: Add the possibility to use a session token (*)
+* [Add]: Add the possibility to use a session token (thanks for the first implementation [@lucaantonelli](https://github.com/lucaantonelli)!)
 * [Add]: Add the `maxHeight` paramter to manipulate the overlay height (special thanks to [@Muhammed-Ayad](https://github.com/Muhammed-Ayad)!)
 * [Chore]: Remove unused `toJson` methods from several classes
+* [Chore]: Added doc comments to `GooglePlacesAutoCompleteTextFormField`
+* [Breaking]: Rename `itmClick` to `onSuggestionClicked`
+* [Breaking]: Rename `isLatLngRequired` to `fetchCoordinates`
 
 ## 0.1.3
 
