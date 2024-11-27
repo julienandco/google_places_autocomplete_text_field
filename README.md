@@ -2,6 +2,8 @@
 
 This Flutter package helps you build a TextField that provides autocompletion suggestions from the [new Google Places API](https://developers.google.com/maps/documentation/places/web-service/op-overview).
 
+![](https://github.com/julienandco/google_places_autocomplete_text_field/preview.gif)
+
 ## Add the dependency to pubspec.yml ➕
 
 ```yaml
