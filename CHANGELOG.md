@@ -1,5 +1,15 @@
 # Changelog 🪵
 
+## 1.0.0
+
+All the changes marked with (*) are the work of [@lucaantonelli](https://github.com/lucaantonelli), thank you a lot!
+
+* [Breaking]: Implement new Places API (*)
+* [Breaking]: Fix typo: `GetPlaceDetailswWithLatLng` -> `GetPlaceDetailsWithLatLng` (*)
+* [Add]: Add a minimum input length (*)
+* [Add]: Add the possibility to use a session token (*)
+* [Chore]: Remove unused `toJson` methods from several classes
+
 ## 0.1.3
 
 * [Fix]: Removed the duplicate declaration of the fields `inputDecoration` and `decoration`, which were misleading. Now only the field `decoration` is available to assign a `InputDecoration`  to the `GooglePlacesAutoCompleteTextFormField`, following the `TextFormField` convention.
