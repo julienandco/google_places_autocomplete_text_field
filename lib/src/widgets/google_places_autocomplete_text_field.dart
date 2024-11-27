@@ -349,6 +349,10 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     final overlay = Overlay.of(context);
     getLocation(text).then(
       (_) {
+        try {
+          _overlayEntry?.remove();
+        } catch (_) {}
+
         _overlayEntry = null;
         _overlayEntry = _createOverlayEntry();
         overlay.insert(_overlayEntry!);
