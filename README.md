@@ -23,12 +23,12 @@ dependencies:
         proxyURL: "https://your-proxy.com/", // only needed if you build for the web
         debounceTime: 400, // defaults to 600 ms
         countries: ["de"], // optional, by default the list is empty (no restrictions)
-        isLatLngRequired: true, // if you require the coordinates from the place details
+        fetchCoordinates: true, // if you require the coordinates from the place details
         getPlaceDetailsWithLatLng: (prediction) {
          // this method will return latlng with place detail
         print("Coordinates: (${prediction.lat},${prediction.lng})");
-        }, // this callback is called when isLatLngRequired is true
-        itmClick: (prediction) {
+        }, // this callback is called when fetchCoordinates is true
+        onSuggestionClicked: (prediction) {
          controller.text = prediction.description;
           controller.selection = TextSelection.fromPosition(TextPosition(offset: prediction.description.length));
         }
