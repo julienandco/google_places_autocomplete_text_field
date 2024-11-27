@@ -8,7 +8,7 @@ All the changes marked with (*) are the work of [@lucaantonelli](https://github.
 * [Breaking]: Fix typo: `GetPlaceDetailswWithLatLng` -> `GetPlaceDetailsWithLatLng` (*)
 * [Add]: Add a minimum input length (*)
 * [Add]: Add the possibility to use a session token (*)
-* [Chore]: Remove unused `toJson` methods from `PlaceDetails` and `Result`
+* [Chore]: Remove unused `toJson` methods from several classes
 
 ## 0.1.3
 

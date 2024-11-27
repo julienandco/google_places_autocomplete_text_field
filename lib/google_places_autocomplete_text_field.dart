@@ -279,8 +279,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     );
     final response =
         await _dio.post(url, options: options, data: jsonEncode(requestBody));
-    subscriptionResponse =
-        PlacesAutocompleteResponse.fromJsonNewApi(response.data);
+    subscriptionResponse = PlacesAutocompleteResponse.fromJson(response.data);
 
     isSearched = false;
     if (subscriptionResponse.predictions!.isNotEmpty) {

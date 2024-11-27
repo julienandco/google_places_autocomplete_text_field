@@ -55,13 +55,12 @@ class Result {
     formattedAddress = json['formattedAddress'];
     icon = json['iconMaskBaseUri'];
     name = json['name'];
-    geometry = json['location'] != null
-        ? Geometry.fromJsonNewApi(json['location'])
-        : null;
+    geometry =
+        json['location'] != null ? Geometry.fromJson(json['location']) : null;
     if (json['photos'] != null) {
       photos = [];
       json['photos'].forEach((v) {
-        photos!.add(Photos.fromJsonNewApi(v));
+        photos!.add(Photos.fromJson(v));
       });
     }
     placeId = json['placeId'];
@@ -84,14 +83,6 @@ class AddressComponents {
     shortName = json['short_name'];
     types = json['types'].cast<String>();
   }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['long_name'] = longName;
-    data['short_name'] = shortName;
-    data['types'] = types;
-    return data;
-  }
 }
 
 class Geometry {
@@ -101,25 +92,7 @@ class Geometry {
   Geometry({this.location, this.viewport});
 
   Geometry.fromJson(Map<String, dynamic> json) {
-    location =
-        json['location'] != null ? Location.fromJson(json['location']) : null;
-    viewport =
-        json['viewport'] != null ? Viewport.fromJson(json['viewport']) : null;
-  }
-
-  Geometry.fromJsonNewApi(Map<String, dynamic> json) {
-    location = Location.fromJsonNewApi(json);
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    if (location != null) {
-      data['location'] = location!.toJson();
-    }
-    if (viewport != null) {
-      data['viewport'] = viewport!.toJson();
-    }
-    return data;
+    location = Location.fromJson(json);
   }
 }
 
@@ -130,20 +103,8 @@ class Location {
   Location({this.lat, this.lng});
 
   Location.fromJson(Map<String, dynamic> json) {
-    lat = json['lat'];
-    lng = json['lng'];
-  }
-
-  Location.fromJsonNewApi(Map<String, dynamic> json) {
     lat = json['latitude'];
     lng = json['longitude'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['lat'] = lat;
-    data['lng'] = lng;
-    return data;
   }
 }
 
@@ -159,17 +120,6 @@ class Viewport {
     southwest =
         json['southwest'] != null ? Location.fromJson(json['southwest']) : null;
   }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    if (northeast != null) {
-      data['northeast'] = northeast!.toJson();
-    }
-    if (southwest != null) {
-      data['southwest'] = southwest!.toJson();
-    }
-    return data;
-  }
 }
 
 class Photos {
@@ -181,25 +131,9 @@ class Photos {
   Photos({this.height, this.htmlAttributions, this.photoReference, this.width});
 
   Photos.fromJson(Map<String, dynamic> json) {
-    height = json['height'];
-    htmlAttributions = json['html_attributions'].cast<String>();
-    photoReference = json['photo_reference'];
-    width = json['width'];
-  }
-
-  Photos.fromJsonNewApi(Map<String, dynamic> json) {
     height = json['heightPx'];
     htmlAttributions = json['authorAttributions'].cast<String>();
     photoReference = json['name'];
     width = json['widthPx'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['height'] = height;
-    data['html_attributions'] = htmlAttributions;
-    data['photo_reference'] = photoReference;
-    data['width'] = width;
-    return data;
   }
 }
