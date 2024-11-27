@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   dio: ^5.1.1
-  rxdart: ^0.27.7
+  rxdart: ">=0.27.7 <0.29.0"
 
 dev_dependencies:
   flutter_test:
