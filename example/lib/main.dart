@@ -75,17 +75,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 maxLines: 1,
                 overlayContainer: (child) => Material(
                   elevation: 1.0,
-                  color: Colors.green,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   child: child,
                 ),
                 getPlaceDetailsWithLatLng: (prediction) {
                   print('placeDetails${prediction.lng}');
                 },
-                itmClick: (Prediction prediction) =>
+                onSuggestionClicked: (Prediction prediction) =>
                     _textController.text = prediction.description!,
                 minInputLength: 3,
-                useSessionToken: false,
               ),
             ),
             const SizedBox(height: 24),
