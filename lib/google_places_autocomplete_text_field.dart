@@ -77,7 +77,6 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   final OverlayContainer? overlayContainer;
   final String? proxyURL;
   final int? minInputLength;
-  final bool usePlacesApiNew;
   final bool useSessionToken;
 
   const GooglePlacesAutoCompleteTextFormField({
@@ -95,7 +94,6 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.overlayContainer,
     this.proxyURL,
     this.minInputLength,
-    this.usePlacesApiNew = false,
     this.useSessionToken = true,
 
     ////// DEFAULT TEXT FORM INPUTS
@@ -265,46 +263,24 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       sessionToken = widget.useSessionToken ? uuid.v4() : null;
     }
 
-    if (widget.usePlacesApiNew) {
-      String url =
-          "${prefix}https://places.googleapis.com/v1/places:autocomplete";
+    String url =
+        "${prefix}https://places.googleapis.com/v1/places:autocomplete";
 
-      Map<String, dynamic> requestBody = {"input": text};
+    Map<String, dynamic> requestBody = {"input": text};
 
-      if (widget.countries != null) {
-        requestBody["includedRegionCodes"] = widget.countries;
-      }
-      if (sessionToken != null) {
-        requestBody["sessionToken"] = sessionToken;
-      }
-      Options options = Options(
-        headers: {"X-Goog-Api-Key": widget.googleAPIKey},
-      );
-      final response =
-          await _dio.post(url, options: options, data: jsonEncode(requestBody));
-      subscriptionResponse =
-          PlacesAutocompleteResponse.fromJsonNewApi(response.data);
-    } else {
-      String url =
-          "${prefix}https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$text&key=${widget.googleAPIKey}";
-
-      if (widget.countries != null) {
-        for (int i = 0; i < widget.countries!.length; i++) {
-          final country = widget.countries![i];
-
-          if (i == 0) {
-            url = "$url&components=country:$country";
-          } else {
-            url = "$url|country:$country";
-          }
-        }
-      }
-      if (sessionToken != null) {
-        url += "&sessiontoken=$sessionToken";
-      }
-      final response = await _dio.get(url);
-      subscriptionResponse = PlacesAutocompleteResponse.fromJson(response.data);
+    if (widget.countries != null) {
+      requestBody["includedRegionCodes"] = widget.countries;
     }
+    if (sessionToken != null) {
+      requestBody["sessionToken"] = sessionToken;
+    }
+    Options options = Options(
+      headers: {"X-Goog-Api-Key": widget.googleAPIKey},
+    );
+    final response =
+        await _dio.post(url, options: options, data: jsonEncode(requestBody));
+    subscriptionResponse =
+        PlacesAutocompleteResponse.fromJsonNewApi(response.data);
 
     isSearched = false;
     if (subscriptionResponse.predictions!.isNotEmpty) {
@@ -313,13 +289,16 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     }
   }
 
-  Future<void> textChanged(String text) async => getLocation(text).then(
-        (_) {
-          _overlayEntry = null;
-          _overlayEntry = _createOverlayEntry();
-          Overlay.of(context).insert(_overlayEntry!);
-        },
-      );
+  Future<void> textChanged(String text) async {
+    final overlay = Overlay.of(context);
+    getLocation(text).then(
+      (_) {
+        _overlayEntry = null;
+        _overlayEntry = _createOverlayEntry();
+        overlay.insert(_overlayEntry!);
+      },
+    );
+  }
 
   OverlayEntry? _createOverlayEntry() {
     if (context.findRenderObject() != null) {
@@ -385,28 +364,16 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   Future<void> getPlaceDetailsFromPlaceId(Prediction prediction) async {
     try {
       final prefix = widget.proxyURL ?? "";
-      PlaceDetails placeDetails;
-      if (widget.usePlacesApiNew) {
-        String url =
-            "${prefix}https://places.googleapis.com/v1/places/${prediction.placeId}?fields=*&key=${widget.googleAPIKey}";
-        if (sessionToken != null) {
-          url += "&sessionToken=$sessionToken";
-          sessionToken = null; // Reset session token
-        }
-        final response = await _dio.get(url);
 
-        placeDetails = PlaceDetails.fromJsonNewApi(response.data);
-      } else {
-        String url =
-            "${prefix}https://maps.googleapis.com/maps/api/place/details/json?placeid=${prediction.placeId}&key=${widget.googleAPIKey}";
-        if (sessionToken != null) {
-          url += "&sessionToken=$sessionToken";
-          sessionToken = null; // Reset session token
-        }
-        final response = await _dio.get(url);
-
-        placeDetails = PlaceDetails.fromJson(response.data);
+      String url =
+          "${prefix}https://places.googleapis.com/v1/places/${prediction.placeId}?fields=*&key=${widget.googleAPIKey}";
+      if (sessionToken != null) {
+        url += "&sessionToken=$sessionToken";
+        sessionToken = null; // Reset session token
       }
+      final response = await _dio.get(url);
+
+      final placeDetails = PlaceDetails.fromJson(response.data);
 
       prediction.lat = placeDetails.result!.geometry!.location!.lat.toString();
       prediction.lng = placeDetails.result!.geometry!.location!.lng.toString();

@@ -85,7 +85,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 itmClick: (Prediction prediction) =>
                     _textController.text = prediction.description!,
                 minInputLength: 3,
-                usePlacesApiNew: false,
                 useSessionToken: false,
               ),
             ),
