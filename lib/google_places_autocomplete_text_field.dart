@@ -277,14 +277,19 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     Options options = Options(
       headers: {"X-Goog-Api-Key": widget.googleAPIKey},
     );
-    final response =
-        await _dio.post(url, options: options, data: jsonEncode(requestBody));
-    subscriptionResponse = PlacesAutocompleteResponse.fromJson(response.data);
 
-    isSearched = false;
-    if (subscriptionResponse.predictions!.isNotEmpty) {
-      allPredictions.clear();
-      allPredictions.addAll(subscriptionResponse.predictions!);
+    try {
+      final response =
+          await _dio.post(url, options: options, data: jsonEncode(requestBody));
+      subscriptionResponse = PlacesAutocompleteResponse.fromJson(response.data);
+
+      isSearched = false;
+      if (subscriptionResponse.predictions!.isNotEmpty) {
+        allPredictions.clear();
+        allPredictions.addAll(subscriptionResponse.predictions!);
+      }
+    } catch (e) {
+      debugPrint(e.toString());
     }
   }
 
