@@ -79,7 +79,7 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   final bool useSessionToken;
 
   /// The maximum height of the suggestions list
-  final double? maxHeight;
+  final double maxHeight;
 
   const GooglePlacesAutoCompleteTextFormField({
     super.key,
@@ -148,7 +148,7 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.mouseCursor,
     this.contextMenuBuilder,
     this.validator,
-    this.maxHeight,
+    this.maxHeight = 200,
   });
 
   @override
@@ -337,7 +337,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   Widget get _overlayChild {
     return Container(
       constraints: BoxConstraints(
-        maxHeight: widget.maxHeight ?? 200,
+        maxHeight: widget.maxHeight,
       ),
       child: ListView.builder(
         padding: EdgeInsets.zero,
