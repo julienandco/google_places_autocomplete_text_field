@@ -17,6 +17,7 @@ All the changes marked with (*) are the work of [@lucaantonelli](https://github.
 * [Fix]: Make the `TextEditingController` nullable and ensure the `initialValue` property can be used (thanks for finding this bug [@trusilosv](https://github.com/trusilosv)!)
 * [Add]: Add the `fetchSuggestionsForInitialValue` parameter to instantly fetch suggestions when an initial value is given.
 * [Refactor]: Extract the Google Places API logic into an own class
+* [Fix]: Make sure the overlay adapts to multiline input (thanks for finding this bug [@iamdiogo](https://github.com/iamdiogo)!)
 
 ## 0.1.3
 
