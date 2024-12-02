@@ -24,7 +24,7 @@ dependencies:
         debounceTime: 400, // defaults to 600 ms
         countries: ["de"], // optional, by default the list is empty (no restrictions)
         fetchCoordinates: true, // if you require the coordinates from the place details
-        getPlaceDetailsWithLatLng: (prediction) {
+        onPlaceDetailsWithCoordinatesReceived: (prediction) {
          // this method will return latlng with place detail
         print("Coordinates: (${prediction.lat},${prediction.lng})");
         }, // this callback is called when fetchCoordinates is true
