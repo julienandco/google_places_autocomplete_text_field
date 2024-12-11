@@ -26,6 +26,7 @@ class GooglePlacesApi {
     List<String> countries = const [],
     String? sessionToken,
     String proxyUrl = '',
+    String? languageCode,
   }) async {
     final prefix = proxyUrl;
 
@@ -37,24 +38,23 @@ class GooglePlacesApi {
 
     if (countries.isNotEmpty) {
       requestBody["includedRegionCodes"] = countries;
+      requestBody["languageCode"] = languageCode;
     }
     if (sessionToken != null) {
       requestBody["sessionToken"] = sessionToken;
     }
     Options options = Options(
-      headers: {"X-Goog-Api-Key": googleAPIKey},
+      headers: {
+        "X-Goog-Api-Key": googleAPIKey,
+        "X-Goog-FieldMask": "*",
+      },
     );
 
-    try {
-      final response =
-          await _dio.post(url, options: options, data: jsonEncode(requestBody));
-      final subscriptionResponse =
-          PlacesAutocompleteResponse.fromJson(response.data);
-      return subscriptionResponse;
-    } catch (e) {
-      debugPrint('GooglePlacesApi.getSuggestionsForInput: ${e.toString()}');
-      return null;
-    }
+    final response =
+        await _dio.post(url, options: options, data: jsonEncode(requestBody));
+    final subscriptionResponse =
+        PlacesAutocompleteResponse.fromJson(response.data);
+    return subscriptionResponse;
   }
 
   /// Fetches the place details for the given [prediction] with the provided
