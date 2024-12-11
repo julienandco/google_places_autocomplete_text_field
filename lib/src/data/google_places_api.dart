@@ -51,6 +51,16 @@ class GooglePlacesApi {
       final subscriptionResponse =
           PlacesAutocompleteResponse.fromJson(response.data);
       return subscriptionResponse;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        debugPrint(
+            'GooglePlacesApi.getSuggestionsForInput: DioException [${e.type}]: ${e.message}');
+        debugPrint('Response data: ${e.response?.data}');
+      } else {
+        debugPrint(
+            'GooglePlacesApi.getSuggestionsForInput: DioException [${e.type}]: ${e.message}');
+      }
+      return null;
     } catch (e) {
       debugPrint('GooglePlacesApi.getSuggestionsForInput: ${e.toString()}');
       return null;
@@ -81,6 +91,16 @@ class GooglePlacesApi {
       prediction.lng = placeDetails.result!.geometry!.location!.lng.toString();
 
       return prediction;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        debugPrint(
+            'GooglePlacesApi.fetchCoordinatesForPrediction: DioException [${e.type}]: ${e.message}');
+        debugPrint('Response data: ${e.response?.data}');
+      } else {
+        debugPrint(
+            'GooglePlacesApi.fetchCoordinatesForPrediction: DioException [${e.type}]: ${e.message}');
+      }
+      return null;
     } catch (e) {
       debugPrint(
           'GooglePlacesApi.fetchCoordinatesForPrediction: ${e.toString()}');
