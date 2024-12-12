@@ -343,8 +343,10 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       allPredictions.addAll(predictions);
     } catch (e) {
       debugPrint('getLocation: ${e.toString()}');
-      if (widget.onError != null) {
+      if (e is DioException) {
         widget.onError?.call((e as DioException).response);
+      } else {
+        widget.onError?.call(e);
       }
     }
   }
@@ -373,9 +375,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
         _overlayEntry = _createOverlayEntry();
         overlay.insert(_overlayEntry!);
       },
-    ).catchError((e) {
-      print(e);
-    });
+    );
   }
 
   OverlayEntry? _createOverlayEntry() {
