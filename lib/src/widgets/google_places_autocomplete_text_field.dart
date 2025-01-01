@@ -330,6 +330,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     if (text.isEmpty || text.length < widget.minInputLength) {
       allPredictions.clear();
       _overlayEntry?.remove();
+      _overlayEntry?.dispose();
       return;
     }
 
@@ -443,6 +444,11 @@ class _GooglePlacesAutoCompleteTextFormFieldState
 
   void removeOverlay() {
     allPredictions.clear();
+    try {
+      _overlayEntry?.remove();
+    } catch (_) {}
+
+    _overlayEntry?.dispose();
     _overlayEntry = _createOverlayEntry();
     Overlay.of(context).insert(_overlayEntry!);
     _overlayEntry!.markNeedsBuild();
