@@ -1,5 +1,12 @@
 # Changelog 🪵
 
+## 1.1.0
+
+* [Docs]: Add documentation for undocumented class members (thank you [@Pietrucci-Blacher](https://github.com/Pietrucci-Blacher)!)
+* [Fix]: Handle unhandled exception when widget is disposed (thanks for finding this bug [@jsanders5](https://github.com/jsanders5)!)
+* [Fix]: Improve the error handling in the API class (thank you [@Alienjob](https://github.com/Alienjob)!)
+* [Feat]: Add language code functionality to receive API answers in the specified language (thank you [@raulgarciaalcaraz-zero](https://github.com/raulgarciaalcaraz-zero)!)
+
 ## 1.0.0
 
 All the changes marked with (*) are the work of [@lucaantonelli](https://github.com/lucaantonelli), thank you a lot!
