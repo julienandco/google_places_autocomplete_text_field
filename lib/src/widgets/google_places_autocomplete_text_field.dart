@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -217,11 +219,25 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   final LayerLink _layerLink = LayerLink();
 
   late FocusNode _focus;
+  late StreamSubscription<String> subscription;
+  CancelableOperation? cancelableOperation;
+
+  @override
+  void dispose() {
+    subscription.cancel();
+    subject.close();
+    _focus.dispose();
+    if (cancelableOperation != null) {
+      cancelableOperation?.cancel();
+    }
+
+    super.dispose();
+  }
 
   @override
   void initState() {
     _api = GooglePlacesApi();
-    subject.stream
+    subscription = subject.stream
         .distinct()
         .debounceTime(Duration(milliseconds: widget.debounceTime))
         .listen(textChanged);
@@ -314,6 +330,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     if (text.isEmpty || text.length < widget.minInputLength) {
       allPredictions.clear();
       _overlayEntry?.remove();
+      _overlayEntry?.dispose();
       return;
     }
 
@@ -345,9 +362,15 @@ class _GooglePlacesAutoCompleteTextFormFieldState
         ?.call(predictionWithCoordinates);
   }
 
+  Future<dynamic> fromCancelable(Future<dynamic> future) async {
+    cancelableOperation =
+        CancelableOperation.fromFuture(future, onCancel: () {});
+    return cancelableOperation?.value;
+  }
+
   Future<void> textChanged(String text) async {
     final overlay = Overlay.of(context);
-    getLocation(text).then(
+    fromCancelable(getLocation(text)).then(
       (_) {
         try {
           _overlayEntry?.remove();
@@ -421,6 +444,11 @@ class _GooglePlacesAutoCompleteTextFormFieldState
 
   void removeOverlay() {
     allPredictions.clear();
+    try {
+      _overlayEntry?.remove();
+    } catch (_) {}
+
+    _overlayEntry?.dispose();
     _overlayEntry = _createOverlayEntry();
     Overlay.of(context).insert(_overlayEntry!);
     _overlayEntry!.markNeedsBuild();
