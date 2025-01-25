@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:async/async.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -79,6 +80,8 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.contextMenuBuilder,
     this.validator,
     this.maxHeight = 200,
+    this.languageCode,
+    this.onError,
     super.key,
   });
 
@@ -129,6 +132,10 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   /// is null, the suggestions will not be limited to any country.
   final List<String>? countries;
 
+  /// The language code that is used to fetch the suggestions. If this is null,
+  /// the default language code of the device will be used.
+  final String? languageCode;
+
   /// The texxt style of the predictions that are shown in the suggestions list.
   final TextStyle? predictionsStyle;
 
@@ -153,6 +160,8 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   /// The maximum height of the suggestions list [OverlayContainer]. If a custom
   /// [overlayContainerBuilder] is provided, this value will be ignored.
   final double maxHeight;
+
+  final Function? onError;
 
   // The following properties are the same as the ones in the TextFormField
   // widget. They are used to customize the text form field.
@@ -334,20 +343,29 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       return;
     }
 
-    final result = await _api.getSuggestionsForInput(
-      input: text,
-      googleAPIKey: widget.googleAPIKey,
-      countries: widget.countries ?? [],
-      sessionToken: widget.sessionToken,
-      proxyUrl: widget.proxyURL ?? "",
-    );
+    try {
+      final result = await _api.getSuggestionsForInput(
+        input: text,
+        googleAPIKey: widget.googleAPIKey,
+        countries: widget.countries ?? [],
+        sessionToken: widget.sessionToken,
+        proxyUrl: widget.proxyURL ?? "",
+        languageCode: widget.languageCode,
+      );
+      if (result == null) return;
+      final predictions = result.predictions;
+      if (predictions == null || predictions.isEmpty) return;
 
-    if (result == null) return;
-    final predictions = result.predictions;
-    if (predictions == null || predictions.isEmpty) return;
-
-    allPredictions.clear();
-    allPredictions.addAll(predictions);
+      allPredictions.clear();
+      allPredictions.addAll(predictions);
+    } catch (e) {
+      debugPrint('getLocation: ${e.toString()}');
+      if (e is DioException) {
+        widget.onError?.call(e.response);
+      } else {
+        widget.onError?.call(e);
+      }
+    }
   }
 
   Future<void> getPlaceDetailsFromPlaceId(Prediction prediction) async {
