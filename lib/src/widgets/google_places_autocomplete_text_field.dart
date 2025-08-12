@@ -17,18 +17,13 @@ import 'package:rxdart/rxdart.dart';
 class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   /// {@macro google_places_autocomplete_text_form_field}
   const GooglePlacesAutoCompleteTextFormField({
-    required this.googleAPIKey,
+    required this.config,
     this.textEditingController,
-    this.debounceTime = 600,
     this.onSuggestionClicked,
-    this.fetchCoordinates = true,
-    this.countries = const [],
     this.onPlaceDetailsWithCoordinatesReceived,
     this.predictionsStyle,
     this.overlayContainerBuilder,
-    this.proxyURL,
     this.minInputLength = 0,
-    this.sessionToken,
     this.initialValue,
     this.fetchSuggestionsForInitialValue = false,
     this.focusNode,
@@ -80,10 +75,12 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.contextMenuBuilder,
     this.validator,
     this.maxHeight = 200,
-    this.languageCode,
     this.onError,
     super.key,
   });
+
+  /// The configuration for the Google API to be used during any request.
+  final GoogleApiConfig config;
 
   /// The initial value to be held inside the text form field. If this is not
   /// null and [textEditingController] is not null as well, this value will be
@@ -113,49 +110,17 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   final void Function(Prediction prediction)?
       onPlaceDetailsWithCoordinatesReceived;
 
-  /// Whether the coordinates should be fetched for the selected place as well.
-  /// Otherwise the place details are returned without coordinate
-  /// information. If set to true, [onPlaceDetailsWithCoordinatesReceived] needs
-  /// to be not null.
-  final bool fetchCoordinates;
-
-  /// The Google API key that is used to authenticate the requests to the
-  /// Google Places API.
-  final String googleAPIKey;
-
-  /// The time in milliseconds that the widget waits before sending a request
-  /// to the Google Places API. This is used to prevent too many requests from
-  /// being sent.
-  final int debounceTime;
-
-  /// The list of countries that the suggestions should be limited to. If this
-  /// is null, the suggestions will not be limited to any country.
-  final List<String>? countries;
-
-  /// The language code that is used to fetch the suggestions. If this is null,
-  /// the default language code of the device will be used.
-  final String? languageCode;
-
-  /// The texxt style of the predictions that are shown in the suggestions list.
+  /// The text style of the predictions that are shown in the suggestions list.
   final TextStyle? predictionsStyle;
 
   /// The widget that is shown as an overlay to the text form field. If this is
   /// null, a default Material widget will be used.
   final Widget Function(Widget overlayChild)? overlayContainerBuilder;
 
-  /// The URL of the proxy server that is used to send the requests to the
-  /// Google Places API. If this is null, the requests will be sent directly to
-  /// the Google Places API.
-  final String? proxyURL;
-
   /// The minimum length of the input that is required to send a request to the
   /// Google Places API. If the input is shorter than this value, no request
   /// will be sent.
   final int minInputLength;
-
-  /// The session token to be used for the requests to the Google
-  /// Places API.
-  final String? sessionToken;
 
   /// The maximum height of the suggestions list [OverlayContainer]. If a custom
   /// [overlayContainerBuilder] is provided, this value will be ignored.
@@ -248,7 +213,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     _api = GooglePlacesApi();
     subscription = subject.stream
         .distinct()
-        .debounceTime(Duration(milliseconds: widget.debounceTime))
+        .debounceTime(Duration(milliseconds: widget.config.debounceTime))
         .listen(textChanged);
 
     _focus = widget.focusNode ?? FocusNode();
@@ -343,14 +308,16 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       return;
     }
 
+    final config = widget.config;
+
     try {
       final result = await _api.getSuggestionsForInput(
         input: text,
-        googleAPIKey: widget.googleAPIKey,
-        countries: widget.countries ?? [],
-        sessionToken: widget.sessionToken,
-        proxyUrl: widget.proxyURL ?? "",
-        languageCode: widget.languageCode,
+        googleAPIKey: config.apiKey,
+        countries: config.countries,
+        sessionToken: config.sessionToken,
+        proxyUrl: config.proxyURL ?? '',
+        languageCode: config.languageCode,
       );
       if (result == null) return;
       final predictions = result.predictions;
@@ -369,11 +336,12 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   }
 
   Future<void> getPlaceDetailsFromPlaceId(Prediction prediction) async {
+    final config = widget.config;
     final predictionWithCoordinates = await _api.fetchCoordinatesForPrediction(
       prediction: prediction,
-      googleAPIKey: widget.googleAPIKey,
-      proxyUrl: widget.proxyURL ?? "",
-      sessionToken: widget.sessionToken,
+      googleAPIKey: config.apiKey,
+      proxyUrl: config.proxyURL ?? '',
+      sessionToken: config.sessionToken,
     );
     if (predictionWithCoordinates == null) return;
     widget.onPlaceDetailsWithCoordinatesReceived
@@ -441,10 +409,11 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       itemBuilder: (BuildContext context, int index) => InkWell(
         onTap: () {
           if (index < allPredictions.length) {
-            widget.onSuggestionClicked!(allPredictions[index]);
-            if (!widget.fetchCoordinates) return;
+            final prediction = allPredictions.elementAt(index);
+            widget.onSuggestionClicked!(prediction);
+            if (!widget.config.fetchPlaceDetailsWithCoordinates) return;
 
-            getPlaceDetailsFromPlaceId(allPredictions[index]);
+            getPlaceDetailsFromPlaceId(prediction);
 
             removeOverlay();
           }

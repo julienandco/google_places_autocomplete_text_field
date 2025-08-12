@@ -32,10 +32,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final _yourGoogleAPIKey = 'foo-bar-baz';
-
-  // only needed if you build for the web
-  final _yourProxyURL = 'https://your-proxy.com/';
+  final _config = const GoogleApiConfig(
+    apiKey: 'foo-bar-baz',
+    // only needed if you build for the web
+    proxyURL: 'https://your-proxy.com/',
+  );
 
   final _textController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -56,8 +57,8 @@ class _MyHomePageState extends State<MyHomePage> {
               key: _formKey,
               autovalidateMode: _autovalidateMode,
               child: GooglePlacesAutoCompleteTextFormField(
+                config: _config,
                 textEditingController: _textController,
-                googleAPIKey: _yourGoogleAPIKey,
                 decoration: const InputDecoration(
                   hintText: 'Enter your address',
                   labelText: 'Address',
@@ -79,7 +80,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: child,
                 ),
                 onPlaceDetailsWithCoordinatesReceived: (prediction) {
-                  print('placeDetails${prediction.lng}');
+                  // Do something with the place details with coordinates
+                  //print('placeDetails${prediction.lng}');
                 },
                 onSuggestionClicked: (Prediction prediction) =>
                     _textController.text = prediction.description!,
@@ -102,7 +104,5 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() => _autovalidateMode = AutovalidateMode.always);
       return;
     }
-
-    print(_textController.text);
   }
 }
