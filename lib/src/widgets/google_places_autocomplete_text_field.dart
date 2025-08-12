@@ -308,16 +308,10 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       return;
     }
 
-    final config = widget.config;
-
     try {
       final result = await _api.getSuggestionsForInput(
         input: text,
-        googleAPIKey: config.apiKey,
-        countries: config.countries,
-        sessionToken: config.sessionToken,
-        proxyUrl: config.proxyURL ?? '',
-        languageCode: config.languageCode,
+        config: widget.config,
       );
       if (result == null) return;
       final predictions = result.predictions;
@@ -336,12 +330,9 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   }
 
   Future<void> getPlaceDetailsFromPlaceId(Prediction prediction) async {
-    final config = widget.config;
     final predictionWithCoordinates = await _api.fetchCoordinatesForPrediction(
       prediction: prediction,
-      googleAPIKey: config.apiKey,
-      proxyUrl: config.proxyURL ?? '',
-      sessionToken: config.sessionToken,
+      config: widget.config,
     );
     if (predictionWithCoordinates == null) return;
     widget.onPlaceDetailsWithCoordinatesReceived

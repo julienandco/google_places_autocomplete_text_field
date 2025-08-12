@@ -2,8 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:google_places_autocomplete_text_field/src/model/place_details.dart';
-import 'package:google_places_autocomplete_text_field/src/model/prediction.dart';
+import 'package:google_places_autocomplete_text_field/google_places_autocomplete_text_field.dart';
 
 /// {@template google_places_api}
 /// Interface for Google Places API.
@@ -22,31 +21,27 @@ class GooglePlacesApi {
   /// [googleAPIKey].
   Future<PlacesAutocompleteResponse?> getSuggestionsForInput({
     required String input,
-    required String googleAPIKey,
-    List<String> countries = const [],
-    String? sessionToken,
-    String proxyUrl = '',
-    String? languageCode,
+    required GoogleApiConfig config,
   }) async {
-    final prefix = proxyUrl;
+    final prefix = config.proxyURL ?? '';
 
-    String url = "$prefix$_apiUrl:autocomplete";
+    String url = '$prefix$_apiUrl:autocomplete';
 
     Map<String, dynamic> requestBody = {
-      "input": input,
+      'input': input,
     };
 
-    if (countries.isNotEmpty) {
-      requestBody["includedRegionCodes"] = countries;
-      requestBody["languageCode"] = languageCode;
+    if (config.countries.isNotEmpty) {
+      requestBody['includedRegionCodes'] = config.countries;
+      requestBody['languageCode'] = config.languageCode;
     }
-    if (sessionToken != null) {
-      requestBody["sessionToken"] = sessionToken;
+    if (config.sessionToken != null) {
+      requestBody['sessionToken'] = config.sessionToken;
     }
     Options options = Options(
       headers: {
-        "X-Goog-Api-Key": googleAPIKey,
-        "X-Goog-FieldMask": "*",
+        'X-Goog-Api-Key': config.apiKey,
+        'X-Goog-FieldMask': '*',
       },
     );
 
@@ -76,17 +71,16 @@ class GooglePlacesApi {
   /// [googleAPIKey].
   Future<Prediction?> fetchCoordinatesForPrediction({
     required Prediction prediction,
-    required String googleAPIKey,
-    String proxyUrl = '',
-    String? sessionToken,
+    required GoogleApiConfig config,
   }) async {
     try {
-      final prefix = proxyUrl;
+      final prefix = config.proxyURL ?? '';
 
       String url =
-          "$prefix$_apiUrl/${prediction.placeId}?fields=*&key=$googleAPIKey";
+          '$prefix$_apiUrl/${prediction.placeId}?fields=*&key=${config.apiKey}';
+      final sessionToken = config.sessionToken;
       if (sessionToken != null) {
-        url += "&sessionToken=$sessionToken";
+        url += '&sessionToken=$sessionToken';
       }
       final response = await _dio.get(url);
 
