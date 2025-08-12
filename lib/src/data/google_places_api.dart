@@ -18,7 +18,7 @@ class GooglePlacesApi {
   final _apiUrl = 'https://places.googleapis.com/v1/places';
 
   /// Fetches suggestions for the given [input] with the provided
-  /// [googleAPIKey].
+  /// [config].
   Future<PlacesAutocompleteResponse?> getSuggestionsForInput({
     required String input,
     required GoogleApiConfig config,
@@ -68,7 +68,7 @@ class GooglePlacesApi {
   }
 
   /// Fetches the place details for the given [prediction] with the provided
-  /// [googleAPIKey].
+  /// [config].
   Future<Prediction?> fetchCoordinatesForPrediction({
     required Prediction prediction,
     required GoogleApiConfig config,
