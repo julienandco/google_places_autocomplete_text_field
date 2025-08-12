@@ -20,7 +20,7 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     required this.config,
     this.textEditingController,
     this.onSuggestionClicked,
-    this.onPlaceDetailsWithCoordinatesReceived,
+    this.onPredictionWithCoordinatesReceived,
     this.predictionsStyle,
     this.overlayContainerBuilder,
     this.minInputLength = 0,
@@ -105,10 +105,10 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   /// that was clicked will be passed as an argument.
   final void Function(Prediction prediction)? onSuggestionClicked;
 
-  /// The callback that is called as soon as the place details with the
+  /// The callback that is called as soon as the prediction with the
   /// coordinates are received.
   final void Function(Prediction prediction)?
-      onPlaceDetailsWithCoordinatesReceived;
+  onPredictionWithCoordinatesReceived;
 
   /// The text style of the predictions that are shown in the suggestions list.
   final TextStyle? predictionsStyle;
@@ -335,29 +335,28 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       config: widget.config,
     );
     if (predictionWithCoordinates == null) return;
-    widget.onPlaceDetailsWithCoordinatesReceived
-        ?.call(predictionWithCoordinates);
+    widget.onPredictionWithCoordinatesReceived?.call(predictionWithCoordinates);
   }
 
   Future<dynamic> fromCancelable(Future<dynamic> future) async {
-    cancelableOperation =
-        CancelableOperation.fromFuture(future, onCancel: () {});
+    cancelableOperation = CancelableOperation.fromFuture(
+      future,
+      onCancel: () {},
+    );
     return cancelableOperation?.value;
   }
 
   Future<void> textChanged(String text) async {
     final overlay = Overlay.of(context);
-    fromCancelable(getLocation(text)).then(
-      (_) {
-        try {
-          _overlayEntry?.remove();
-        } catch (_) {}
+    fromCancelable(getLocation(text)).then((_) {
+      try {
+        _overlayEntry?.remove();
+      } catch (_) {}
 
-        _overlayEntry = null;
-        _overlayEntry = _createOverlayEntry();
-        overlay.insert(_overlayEntry!);
-      },
-    );
+      _overlayEntry = null;
+      _overlayEntry = _createOverlayEntry();
+      overlay.insert(_overlayEntry!);
+    });
   }
 
   OverlayEntry? _createOverlayEntry() {
@@ -367,26 +366,28 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       var offset = renderBox.localToGlobal(Offset.zero);
 
       return OverlayEntry(
-        builder: (context) => Positioned(
-          left: offset.dx,
-          top: size.height + offset.dy,
-          width: size.width,
-          child: CompositedTransformFollower(
-            showWhenUnlinked: false,
-            link: _layerLink,
-            offset: Offset(0.0, size.height + 5.0),
-            child: widget.overlayContainerBuilder?.call(_overlayChild) ??
-                Material(
-                  elevation: 1.0,
-                  child: Container(
-                    constraints: BoxConstraints(
-                      maxHeight: widget.maxHeight,
+        builder:
+            (context) => Positioned(
+              left: offset.dx,
+              top: size.height + offset.dy,
+              width: size.width,
+              child: CompositedTransformFollower(
+                showWhenUnlinked: false,
+                link: _layerLink,
+                offset: Offset(0.0, size.height + 5.0),
+                child:
+                    widget.overlayContainerBuilder?.call(_overlayChild) ??
+                    Material(
+                      elevation: 1.0,
+                      child: Container(
+                        constraints: BoxConstraints(
+                          maxHeight: widget.maxHeight,
+                        ),
+                        child: _overlayChild,
+                      ),
                     ),
-                    child: _overlayChild,
-                  ),
-                ),
-          ),
-        ),
+              ),
+            ),
       );
     }
     return null;
@@ -397,26 +398,31 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       padding: EdgeInsets.zero,
       shrinkWrap: true,
       itemCount: allPredictions.length,
-      itemBuilder: (BuildContext context, int index) => InkWell(
-        onTap: () {
-          if (index < allPredictions.length) {
-            final prediction = allPredictions.elementAt(index);
-            widget.onSuggestionClicked!(prediction);
-            if (!widget.config.fetchPlaceDetailsWithCoordinates) return;
+      itemBuilder: (BuildContext context, int index) {
+        final prediction = allPredictions.elementAt(index);
+        return InkWell(
+          onTap: () {
+            if (index < allPredictions.length) {
+              widget.onSuggestionClicked?.call(prediction);
+              if (!widget.config.fetchPlaceDetailsWithCoordinates) {
+                removeOverlay();
+                return;
+              }
 
-            getPlaceDetailsFromPlaceId(prediction);
+              getPlaceDetailsFromPlaceId(prediction);
 
-            removeOverlay();
-          }
-        },
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          child: Text(
-            allPredictions[index].description!,
-            style: widget.predictionsStyle ?? widget.style,
+              removeOverlay();
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            child: Text(
+              prediction.description!,
+              style: widget.predictionsStyle ?? widget.style,
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
