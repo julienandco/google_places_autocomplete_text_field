@@ -12,12 +12,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Google Places Autocomplete Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(
-        title: 'Google Places Autocomplete Demo',
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const MyHomePage(title: 'Google Places Autocomplete Demo'),
     );
   }
 }
@@ -32,10 +28,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final _config = const GoogleApiConfig(
-    apiKey: 'foo-bar-baz',
+  final _config = GoogleApiConfig(
+    apiKey: 'foo-bar',
+    locationRestriction: LocationConfig.circle(
+      circleCenter: const Coordinates(latitude: 52.5200, longitude: 13.4050),
+      circleRadiusInKilometers: 1000,
+    ),
     // only needed if you build for the web
     proxyURL: 'https://your-proxy.com/',
+    placeTypeRestriction: PlaceType.city,
   );
 
   final _textController = TextEditingController();
@@ -45,9 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
+      appBar: AppBar(title: Text(widget.title)),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -73,26 +72,25 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 // proxyURL: _yourProxyURL,
                 maxLines: 1,
-                overlayContainerBuilder: (child) => Material(
-                  elevation: 1.0,
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  child: child,
-                ),
-                onPlaceDetailsWithCoordinatesReceived: (prediction) {
+                overlayContainerBuilder:
+                    (child) => Material(
+                      elevation: 1.0,
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      child: child,
+                    ),
+                onPredictionWithCoordinatesReceived: (prediction) {
                   // Do something with the place details with coordinates
                   //print('placeDetails${prediction.lng}');
                 },
-                onSuggestionClicked: (Prediction prediction) =>
-                    _textController.text = prediction.description!,
+                onSuggestionClicked:
+                    (Prediction prediction) =>
+                        _textController.text = prediction.description!,
                 minInputLength: 3,
               ),
             ),
             const SizedBox(height: 24),
-            TextButton(
-              onPressed: _onSubmit,
-              child: const Text('Submit'),
-            ),
+            TextButton(onPressed: _onSubmit, child: const Text('Submit')),
           ],
         ),
       ),

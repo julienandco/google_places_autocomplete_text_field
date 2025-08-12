@@ -15,6 +15,7 @@ class GoogleApiConfig {
     this.fetchPlaceDetailsWithCoordinates = false,
     this.locationBias,
     this.locationRestriction,
+    this.placeTypeRestriction,
   }) : assert(
          (locationBias == null || locationRestriction == null),
          'Only one of locationBias or locationRestriction can be provided',
@@ -60,4 +61,25 @@ class GoogleApiConfig {
   /// to the Google Places API.
   /// For more info, refer to Google's docs: https://developers.google.com/maps/documentation/places/web-service/place-autocomplete#location-bias-restriction
   final LocationConfig? locationBias;
+
+  /// The place type restriction to be used for the request
+  /// to the Google Places API. If this is set, the request will only return
+  /// places of the specified type.
+  /// For more info, refer to Google's docs: https://developers.google.com/maps/documentation/places/web-service/place-autocomplete#place-types
+  final PlaceType? placeTypeRestriction;
+}
+
+/// The different primary place types a search result can have.
+enum PlaceType {
+  city,
+  region;
+
+  /// Converts the place type to the JSON representation used in the api
+  /// request.
+  String toJson() {
+    return switch (this) {
+      PlaceType.city => '(cities)',
+      PlaceType.region => '(regions)',
+    };
+  }
 }

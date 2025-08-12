@@ -26,6 +26,11 @@ dependencies:
           countries: ['de'], // optional, by default the list is empty (no restrictions)
           fetchPlaceDetailsWithCoordinates: true,  // if you require the coordinates from the place details
           debounceTime: 400, // defaults to 600 ms
+          locationRestriction: LocationConfig.circle(
+            circleCenter: const Coordinates(latitude: 52.5200, longitude: 13.4050),
+            circleRadiusInKilometers: 1000,
+          ), // either this or locationBias (or nothing)
+          placeTypeRestriction: PlaceType.city, // if you want specific place types
         ),
         onPlaceDetailsWithCoordinatesReceived: (prediction) {
          // this method will return latlng with place detail

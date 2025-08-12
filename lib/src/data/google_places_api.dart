@@ -63,6 +63,11 @@ class GooglePlacesApi implements PlacesApi {
       requestBody['locationBias'] = config.locationBias?.toJson();
     }
 
+    if (config.placeTypeRestriction != null) {
+      requestBody['includedPrimaryTypes'] =
+          config.placeTypeRestriction!.toJson();
+    }
+
     Options options = Options(
       headers: {'X-Goog-Api-Key': config.apiKey, 'X-Goog-FieldMask': '*'},
     );
