@@ -1,5 +1,13 @@
 # Changelog 🪵
 
+## 2.0.0
+
+* [Breaking]: Introduced the `GoogleApiConfig` class to manage the Google Places API Configuration.
+* [Breaking]: Renamed `onPlaceDetailsWithCoordinatesReceived` to `onPredictionWithCoordinatesReceived`.
+* [Breaking]: Bumped up SDK version to `3.7.2`.
+* [Feat]: Add `locationBias` and `locationRestriction` parameters to the api config(see more info [in the Google docs](https://developers.google.com/maps/documentation/places/web-service/place-autocomplete#location-bias-restriction))
+* [Feat]: Add `includedPrimaryTypes` parameter to the api config (see more info [in the Google docs](https://developers.google.com/maps/documentation/places/web-service/place-autocomplete#includedPrimaryTypes))
+
 ## 1.1.0
 
 * [Docs]: Add documentation for undocumented class members (thank you [@Pietrucci-Blacher](https://github.com/Pietrucci-Blacher)!)

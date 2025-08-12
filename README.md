@@ -4,7 +4,7 @@ This Flutter package helps you build a TextField that provides autocompletion su
 
 Go check it out on [pub.dev](https://pub.dev/packages/google_places_autocomplete_text_field)!
 
-![](https://github.com/julienandco/google_places_autocomplete_text_field/blob/main/preview.gif)
+![preview](https://github.com/julienandco/google_places_autocomplete_text_field/blob/main/preview.gif)
 
 ## Add the dependency to pubspec.yml ➕
 
@@ -21,11 +21,19 @@ dependencies:
 ```dart
     GooglePlacesAutoCompleteTextFormField(
         textEditingController: controller,
-        googleAPIKey: "YOUR_GOOGLE_API_KEY",
-        proxyURL: "https://your-proxy.com/", // only needed if you build for the web
-        debounceTime: 400, // defaults to 600 ms
-        countries: ["de"], // optional, by default the list is empty (no restrictions)
-        fetchCoordinates: true, // if you require the coordinates from the place details
+        config: const GoogleApiConfig(
+          apiKey: 'YOUR_GOOGLE_API_KEY',
+          // only needed if you build for the web
+          proxyURL: 'https://your-proxy.com/',
+          countries: ['de'], // optional, by default the list is empty (no restrictions)
+          fetchPlaceDetailsWithCoordinates: true,  // if you require the coordinates from the place details
+          debounceTime: 400, // defaults to 600 ms
+          locationRestriction: LocationConfig.circle(
+            circleCenter: const Coordinates(latitude: 52.5200, longitude: 13.4050),
+            circleRadiusInKilometers: 1000,
+          ), // either this or locationBias (or nothing)
+          placeTypeRestriction: PlaceType.city, // if you want specific place types
+        ),
         onPlaceDetailsWithCoordinatesReceived: (prediction) {
          // this method will return latlng with place detail
         print("Coordinates: (${prediction.lat},${prediction.lng})");

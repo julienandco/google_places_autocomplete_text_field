@@ -17,18 +17,13 @@ import 'package:rxdart/rxdart.dart';
 class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   /// {@macro google_places_autocomplete_text_form_field}
   const GooglePlacesAutoCompleteTextFormField({
-    required this.googleAPIKey,
+    required this.config,
     this.textEditingController,
-    this.debounceTime = 600,
     this.onSuggestionClicked,
-    this.fetchCoordinates = true,
-    this.countries = const [],
-    this.onPlaceDetailsWithCoordinatesReceived,
+    this.onPredictionWithCoordinatesReceived,
     this.predictionsStyle,
     this.overlayContainerBuilder,
-    this.proxyURL,
     this.minInputLength = 0,
-    this.sessionToken,
     this.initialValue,
     this.fetchSuggestionsForInitialValue = false,
     this.focusNode,
@@ -80,10 +75,12 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.contextMenuBuilder,
     this.validator,
     this.maxHeight = 200,
-    this.languageCode,
     this.onError,
     super.key,
   });
+
+  /// The configuration for the Google API to be used during any request.
+  final GoogleApiConfig config;
 
   /// The initial value to be held inside the text form field. If this is not
   /// null and [textEditingController] is not null as well, this value will be
@@ -108,54 +105,22 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   /// that was clicked will be passed as an argument.
   final void Function(Prediction prediction)? onSuggestionClicked;
 
-  /// The callback that is called as soon as the place details with the
+  /// The callback that is called as soon as the prediction with the
   /// coordinates are received.
   final void Function(Prediction prediction)?
-      onPlaceDetailsWithCoordinatesReceived;
+  onPredictionWithCoordinatesReceived;
 
-  /// Whether the coordinates should be fetched for the selected place as well.
-  /// Otherwise the place details are returned without coordinate
-  /// information. If set to true, [onPlaceDetailsWithCoordinatesReceived] needs
-  /// to be not null.
-  final bool fetchCoordinates;
-
-  /// The Google API key that is used to authenticate the requests to the
-  /// Google Places API.
-  final String googleAPIKey;
-
-  /// The time in milliseconds that the widget waits before sending a request
-  /// to the Google Places API. This is used to prevent too many requests from
-  /// being sent.
-  final int debounceTime;
-
-  /// The list of countries that the suggestions should be limited to. If this
-  /// is null, the suggestions will not be limited to any country.
-  final List<String>? countries;
-
-  /// The language code that is used to fetch the suggestions. If this is null,
-  /// the default language code of the device will be used.
-  final String? languageCode;
-
-  /// The texxt style of the predictions that are shown in the suggestions list.
+  /// The text style of the predictions that are shown in the suggestions list.
   final TextStyle? predictionsStyle;
 
   /// The widget that is shown as an overlay to the text form field. If this is
   /// null, a default Material widget will be used.
   final Widget Function(Widget overlayChild)? overlayContainerBuilder;
 
-  /// The URL of the proxy server that is used to send the requests to the
-  /// Google Places API. If this is null, the requests will be sent directly to
-  /// the Google Places API.
-  final String? proxyURL;
-
   /// The minimum length of the input that is required to send a request to the
   /// Google Places API. If the input is shorter than this value, no request
   /// will be sent.
   final int minInputLength;
-
-  /// The session token to be used for the requests to the Google
-  /// Places API.
-  final String? sessionToken;
 
   /// The maximum height of the suggestions list [OverlayContainer]. If a custom
   /// [overlayContainerBuilder] is provided, this value will be ignored.
@@ -248,7 +213,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     _api = GooglePlacesApi();
     subscription = subject.stream
         .distinct()
-        .debounceTime(Duration(milliseconds: widget.debounceTime))
+        .debounceTime(Duration(milliseconds: widget.config.debounceTime))
         .listen(textChanged);
 
     _focus = widget.focusNode ?? FocusNode();
@@ -346,11 +311,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     try {
       final result = await _api.getSuggestionsForInput(
         input: text,
-        googleAPIKey: widget.googleAPIKey,
-        countries: widget.countries ?? [],
-        sessionToken: widget.sessionToken,
-        proxyUrl: widget.proxyURL ?? "",
-        languageCode: widget.languageCode,
+        config: widget.config,
       );
       if (result == null) return;
       final predictions = result.predictions;
@@ -371,34 +332,31 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   Future<void> getPlaceDetailsFromPlaceId(Prediction prediction) async {
     final predictionWithCoordinates = await _api.fetchCoordinatesForPrediction(
       prediction: prediction,
-      googleAPIKey: widget.googleAPIKey,
-      proxyUrl: widget.proxyURL ?? "",
-      sessionToken: widget.sessionToken,
+      config: widget.config,
     );
     if (predictionWithCoordinates == null) return;
-    widget.onPlaceDetailsWithCoordinatesReceived
-        ?.call(predictionWithCoordinates);
+    widget.onPredictionWithCoordinatesReceived?.call(predictionWithCoordinates);
   }
 
   Future<dynamic> fromCancelable(Future<dynamic> future) async {
-    cancelableOperation =
-        CancelableOperation.fromFuture(future, onCancel: () {});
+    cancelableOperation = CancelableOperation.fromFuture(
+      future,
+      onCancel: () {},
+    );
     return cancelableOperation?.value;
   }
 
   Future<void> textChanged(String text) async {
     final overlay = Overlay.of(context);
-    fromCancelable(getLocation(text)).then(
-      (_) {
-        try {
-          _overlayEntry?.remove();
-        } catch (_) {}
+    fromCancelable(getLocation(text)).then((_) {
+      try {
+        _overlayEntry?.remove();
+      } catch (_) {}
 
-        _overlayEntry = null;
-        _overlayEntry = _createOverlayEntry();
-        overlay.insert(_overlayEntry!);
-      },
-    );
+      _overlayEntry = null;
+      _overlayEntry = _createOverlayEntry();
+      overlay.insert(_overlayEntry!);
+    });
   }
 
   OverlayEntry? _createOverlayEntry() {
@@ -408,26 +366,28 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       var offset = renderBox.localToGlobal(Offset.zero);
 
       return OverlayEntry(
-        builder: (context) => Positioned(
-          left: offset.dx,
-          top: size.height + offset.dy,
-          width: size.width,
-          child: CompositedTransformFollower(
-            showWhenUnlinked: false,
-            link: _layerLink,
-            offset: Offset(0.0, size.height + 5.0),
-            child: widget.overlayContainerBuilder?.call(_overlayChild) ??
-                Material(
-                  elevation: 1.0,
-                  child: Container(
-                    constraints: BoxConstraints(
-                      maxHeight: widget.maxHeight,
+        builder:
+            (context) => Positioned(
+              left: offset.dx,
+              top: size.height + offset.dy,
+              width: size.width,
+              child: CompositedTransformFollower(
+                showWhenUnlinked: false,
+                link: _layerLink,
+                offset: Offset(0.0, size.height + 5.0),
+                child:
+                    widget.overlayContainerBuilder?.call(_overlayChild) ??
+                    Material(
+                      elevation: 1.0,
+                      child: Container(
+                        constraints: BoxConstraints(
+                          maxHeight: widget.maxHeight,
+                        ),
+                        child: _overlayChild,
+                      ),
                     ),
-                    child: _overlayChild,
-                  ),
-                ),
-          ),
-        ),
+              ),
+            ),
       );
     }
     return null;
@@ -438,25 +398,31 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       padding: EdgeInsets.zero,
       shrinkWrap: true,
       itemCount: allPredictions.length,
-      itemBuilder: (BuildContext context, int index) => InkWell(
-        onTap: () {
-          if (index < allPredictions.length) {
-            widget.onSuggestionClicked!(allPredictions[index]);
-            if (!widget.fetchCoordinates) return;
+      itemBuilder: (BuildContext context, int index) {
+        final prediction = allPredictions.elementAt(index);
+        return InkWell(
+          onTap: () {
+            if (index < allPredictions.length) {
+              widget.onSuggestionClicked?.call(prediction);
+              if (!widget.config.fetchPlaceDetailsWithCoordinates) {
+                removeOverlay();
+                return;
+              }
 
-            getPlaceDetailsFromPlaceId(allPredictions[index]);
+              getPlaceDetailsFromPlaceId(prediction);
 
-            removeOverlay();
-          }
-        },
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          child: Text(
-            allPredictions[index].description!,
-            style: widget.predictionsStyle ?? widget.style,
+              removeOverlay();
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            child: Text(
+              prediction.description!,
+              style: widget.predictionsStyle ?? widget.style,
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
