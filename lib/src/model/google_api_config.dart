@@ -1,3 +1,5 @@
+part 'location_config.dart';
+
 /// {@template google_api_config}
 /// The configuration for the Google API to be used during any request.
 /// {@endtemplate}
@@ -11,7 +13,12 @@ class GoogleApiConfig {
     this.languageCode,
     this.debounceTime = 600,
     this.fetchPlaceDetailsWithCoordinates = false,
-  });
+    this.locationBias,
+    this.locationRestriction,
+  }) : assert(
+         (locationBias == null || locationRestriction == null),
+         'Only one of locationBias or locationRestriction can be provided',
+       );
 
   /// The Google API key that is used to authenticate the requests to the
   /// Google Places API.
@@ -43,4 +50,14 @@ class GoogleApiConfig {
   /// If set to false, place details are returned without coordinate
   /// information.
   final bool fetchPlaceDetailsWithCoordinates;
+
+  /// Configuration for the location restriction of the request
+  /// to the Google Places API.
+  /// For more info, refer to Google's docs: https://developers.google.com/maps/documentation/places/web-service/place-autocomplete#location-bias-restriction
+  final LocationConfig? locationRestriction;
+
+  /// Configuration for the location bias of the request
+  /// to the Google Places API.
+  /// For more info, refer to Google's docs: https://developers.google.com/maps/documentation/places/web-service/place-autocomplete#location-bias-restriction
+  final LocationConfig? locationBias;
 }

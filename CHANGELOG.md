@@ -3,6 +3,8 @@
 ## 2.0.0
 
 * [Breaking]: Introduced the `GoogleApiConfig` class to manage the Google Places API Configuration.
+* [Breaking]: Renamed `onPlaceDetailsWithCoordinatesReceived` to `onPredictionWithCoordinatesReceived`.
+* [Feat]: Add `locationBias` and `locationRestriction` parameters to the query (see more info [in the Google docs](https://developers.google.com/maps/documentation/places/web-service/place-autocomplete#location-bias-restriction))
 
 ## 1.1.0
 
