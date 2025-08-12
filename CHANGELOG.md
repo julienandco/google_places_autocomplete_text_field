@@ -1,5 +1,9 @@
 # Changelog 🪵
 
+## 2.0.0
+
+* [Breaking]: Introduced the `GoogleApiConfig` class to manage the Google Places API Configuration.
+
 ## 1.1.0
 
 * [Docs]: Add documentation for undocumented class members (thank you [@Pietrucci-Blacher](https://github.com/Pietrucci-Blacher)!)
