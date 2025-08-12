@@ -4,15 +4,15 @@ version: 1.1.0
 homepage: https://github.com/julienandco/google_places_autocomplete_text_field
 
 environment:
-  sdk: '>=2.19.6 <4.0.0'
+  sdk: ^3.7.2
 
 dependencies:
   flutter:
     sdk: flutter
-  dio: ^5.1.1
-  rxdart: ">=0.27.7 <0.29.0"
-  async: ^2.11.0
+  dio: ^5.9.0
+  rxdart: ">=0.28.0"
+  async: ^2.13.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ">=2.0.0 <6.0.0"
+  flutter_lints: ">=5.0.0"
