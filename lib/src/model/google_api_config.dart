@@ -26,8 +26,10 @@ class GoogleApiConfig {
   final String apiKey;
 
   /// The URL of the proxy server that is used to send the requests to the
-  /// Google Places API. If this is null, the requests will be sent directly to
-  /// the Google Places API.
+  /// Google Places API. This completely overrides the default prefix (https://)
+  /// so make sure to include the protocol in your proxy URL as well.
+  /// If this is null, the requests will be sent directly to the Google Places
+  /// API, using a https request.
   final String? proxyURL;
 
   /// The session token to be used for the requests to the Google
