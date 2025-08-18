@@ -2,10 +2,7 @@ class PlacesAutocompleteResponse {
   List<Prediction>? predictions;
   String? status;
 
-  PlacesAutocompleteResponse({
-    this.predictions,
-    this.status,
-  });
+  PlacesAutocompleteResponse({this.predictions, this.status});
 
   PlacesAutocompleteResponse.fromJson(Map<String, dynamic> json) {
     if (json['suggestions'] != null && json['suggestions'].length > 0) {
@@ -47,9 +44,10 @@ class Prediction {
   Prediction.fromJson(Map<String, dynamic> json) {
     placeId = json['placeId'];
     description = json['text'] != null ? json['text']['text'] : null;
-    structuredFormatting = json['structuredFormat'] != null
-        ? StructuredFormatting.fromJson(json['structuredFormat'])
-        : null;
+    structuredFormatting =
+        json['structuredFormat'] != null
+            ? StructuredFormatting.fromJson(json['structuredFormat'])
+            : null;
     types = json['types'].cast<String>();
     lat = json['lat'];
     lng = json['lng'];
