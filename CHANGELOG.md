@@ -1,5 +1,9 @@
 # Changelog 🪵
 
+## 2.0.1
+
+* [Fix]: The proxy URL now completely overrides the default prefix (https), instead of simply prepending the URL (thank you [@abimbola-michael-punch](https://github.com/abimbola-michael-punch)!)
+
 ## 2.0.0
 
 * [Breaking]: Introduced the `GoogleApiConfig` class to manage the Google Places API Configuration.
