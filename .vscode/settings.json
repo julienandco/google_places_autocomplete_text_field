@@ -1,3 +1,4 @@
 {
-  "debug.toolBarLocation": "floating"
+  "debug.toolBarLocation": "floating",
+  "yaml.schemaStore.enable": false
 }

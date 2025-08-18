@@ -34,16 +34,23 @@ class GooglePlacesApi implements PlacesApi {
   final Dio _dio;
 
   /// The API URL for the Google Places API.
-  final _apiUrl = 'https://places.googleapis.com/v1/places';
+  final _apiUrl = 'places.googleapis.com/v1/places';
+
+  String _buildRequestUrl({required String appendix, String? proxyUrl}) {
+    final prefix = proxyUrl ?? 'https://';
+    final url = '$prefix$_apiUrl$appendix';
+    return url;
+  }
 
   @override
   Future<PlacesAutocompleteResponse?> getSuggestionsForInput({
     required String input,
     required GoogleApiConfig config,
   }) async {
-    final prefix = config.proxyURL ?? '';
-
-    String url = '$prefix$_apiUrl:autocomplete';
+    final url = _buildRequestUrl(
+      proxyUrl: config.proxyURL,
+      appendix: ':autocomplete',
+    );
 
     Map<String, dynamic> requestBody = {'input': input};
 
@@ -106,10 +113,11 @@ class GooglePlacesApi implements PlacesApi {
     required GoogleApiConfig config,
   }) async {
     try {
-      final prefix = config.proxyURL ?? '';
+      String url = _buildRequestUrl(
+        proxyUrl: config.proxyURL,
+        appendix: '/${prediction.placeId}?fields=*&key=${config.apiKey}',
+      );
 
-      String url =
-          '$prefix$_apiUrl/${prediction.placeId}?fields=*&key=${config.apiKey}';
       final sessionToken = config.sessionToken;
       if (sessionToken != null) {
         url += '&sessionToken=$sessionToken';
