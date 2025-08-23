@@ -76,6 +76,8 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.validator,
     this.maxHeight = 200,
     this.onError,
+    this.keepFocusAfterSuggestionSelection = false,
+    this.predictionsEmptyWidget,
     super.key,
   });
 
@@ -126,7 +128,16 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   /// [overlayContainerBuilder] is provided, this value will be ignored.
   final double maxHeight;
 
+  /// The callback that is called when an error occurs during the API request.
   final Function? onError;
+
+  /// Whether the focus should be kept on the text field after a suggestion is
+  /// selected.
+  final bool keepFocusAfterSuggestionSelection;
+
+  /// The widget that is shown inside the suggestions overlay when the API call
+  /// returns no predictions. If this is null, a default widget will be shown.
+  final Widget? predictionsEmptyWidget;
 
   // The following properties are the same as the ones in the TextFormField
   // widget. They are used to customize the text form field.
@@ -196,11 +207,15 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   late StreamSubscription<String> subscription;
   CancelableOperation? cancelableOperation;
 
+  late final TextEditingController _textEditingController;
+  bool _showPredictions = false;
+
   @override
   void dispose() {
     subscription.cancel();
     subject.close();
     _focus.dispose();
+    _textEditingController.dispose();
     if (cancelableOperation != null) {
       cancelableOperation?.cancel();
     }
@@ -226,12 +241,23 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       });
     }
 
+    _textEditingController =
+        widget.textEditingController ?? TextEditingController();
+
+    _textEditingController.addListener(() {
+      if (_textEditingController.text.isEmpty) {
+        setState(() {
+          _showPredictions = false;
+        });
+      }
+    });
+
     if (widget.initialValue != null && widget.fetchSuggestionsForInitialValue) {
       subject.add(widget.initialValue!);
     }
 
-    if (widget.initialValue != null && widget.textEditingController != null) {
-      widget.textEditingController!.text = widget.initialValue!;
+    if (widget.initialValue != null) {
+      _textEditingController.text = widget.initialValue!;
     }
 
     super.initState();
@@ -242,9 +268,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     return CompositedTransformTarget(
       link: _layerLink,
       child: TextFormField(
-        controller: widget.textEditingController,
-        initialValue:
-            widget.textEditingController != null ? null : widget.initialValue,
+        controller: _textEditingController,
         focusNode: _focus,
         decoration: widget.decoration,
         keyboardType: widget.keyboardType,
@@ -313,9 +337,16 @@ class _GooglePlacesAutoCompleteTextFormFieldState
         input: text,
         config: widget.config,
       );
+
       if (result == null) return;
       final predictions = result.predictions;
-      if (predictions == null || predictions.isEmpty) return;
+      if (predictions == null) return;
+
+      if (!_showPredictions) {
+        setState(() {
+          _showPredictions = true;
+        });
+      }
 
       allPredictions.clear();
       allPredictions.addAll(predictions);
@@ -355,45 +386,56 @@ class _GooglePlacesAutoCompleteTextFormFieldState
 
       _overlayEntry = null;
       _overlayEntry = _createOverlayEntry();
-      overlay.insert(_overlayEntry!);
+      if (_overlayEntry != null) {
+        overlay.insert(_overlayEntry!);
+      }
     });
   }
 
   OverlayEntry? _createOverlayEntry() {
-    if (context.findRenderObject() != null) {
-      final renderBox = context.findRenderObject() as RenderBox;
-      var size = renderBox.size;
-      var offset = renderBox.localToGlobal(Offset.zero);
+    if (!_showPredictions) return null;
+    final renderObject = context.findRenderObject();
+    if (renderObject == null) return null;
 
-      return OverlayEntry(
-        builder:
-            (context) => Positioned(
-              left: offset.dx,
-              top: size.height + offset.dy,
-              width: size.width,
-              child: CompositedTransformFollower(
-                showWhenUnlinked: false,
-                link: _layerLink,
-                offset: Offset(0.0, size.height + 5.0),
-                child:
-                    widget.overlayContainerBuilder?.call(_overlayChild) ??
-                    Material(
-                      elevation: 1.0,
-                      child: Container(
-                        constraints: BoxConstraints(
-                          maxHeight: widget.maxHeight,
-                        ),
-                        child: _overlayChild,
-                      ),
+    final renderBox = renderObject as RenderBox;
+    var size = renderBox.size;
+    var offset = renderBox.localToGlobal(Offset.zero);
+
+    return OverlayEntry(
+      builder:
+          (context) => Positioned(
+            left: offset.dx,
+            top: size.height + offset.dy,
+            width: size.width,
+            child: CompositedTransformFollower(
+              showWhenUnlinked: false,
+              link: _layerLink,
+              offset: Offset(0.0, size.height + 5.0),
+              child:
+                  widget.overlayContainerBuilder?.call(_overlayChild) ??
+                  Material(
+                    elevation: 1.0,
+                    child: Container(
+                      constraints: BoxConstraints(maxHeight: widget.maxHeight),
+                      child: _overlayChild,
                     ),
-              ),
+                  ),
             ),
-      );
-    }
-    return null;
+          ),
+    );
   }
 
   Widget get _overlayChild {
+    if (allPredictions.isEmpty) {
+      return widget.predictionsEmptyWidget ??
+          Container(
+            padding: const EdgeInsets.all(10),
+            child: Text(
+              'No predictions...',
+              style: widget.predictionsStyle ?? widget.style,
+            ),
+          );
+    }
     return ListView.builder(
       padding: EdgeInsets.zero,
       shrinkWrap: true,
@@ -404,13 +446,12 @@ class _GooglePlacesAutoCompleteTextFormFieldState
           onTap: () {
             if (index < allPredictions.length) {
               widget.onSuggestionClicked?.call(prediction);
-              if (!widget.config.fetchPlaceDetailsWithCoordinates) {
-                removeOverlay();
-                return;
+              if (widget.config.fetchPlaceDetailsWithCoordinates) {
+                getPlaceDetailsFromPlaceId(prediction);
               }
-
-              getPlaceDetailsFromPlaceId(prediction);
-
+              if (!widget.keepFocusAfterSuggestionSelection) {
+                _focus.unfocus();
+              }
               removeOverlay();
             }
           },
@@ -428,12 +469,16 @@ class _GooglePlacesAutoCompleteTextFormFieldState
 
   void removeOverlay() {
     allPredictions.clear();
+    setState(() {
+      _showPredictions = false;
+    });
     try {
       _overlayEntry?.remove();
     } catch (_) {}
 
     _overlayEntry?.dispose();
     _overlayEntry = _createOverlayEntry();
+    if (_overlayEntry == null) return;
     Overlay.of(context).insert(_overlayEntry!);
     _overlayEntry!.markNeedsBuild();
   }

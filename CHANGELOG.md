@@ -1,5 +1,11 @@
 # Changelog 🪵
 
+## 2.0.2
+
+* [Feat]: The text field unfocuses after a suggestion has been selected. This behaviour can be prohibited by setting `keepFocusAfterSuggestionSelection = true`.
+* [Feat]: Whenever the API returns an empty list of predictions, a placeholder widget will be shown inside the overlay, indicating that the request yielded no results. Customize this widget by using `predictionsEmptyWidget`.
+* [Fix]: Added null-safe casts to prevent deserialization from breaking for predictions without types (thank you [@stanimeros](https://github.com/stanimeros) for opening issue [#48](https://github.com/julienandco/google_places_autocomplete_text_field/issues/48)!)
+
 ## 2.0.1
 
 * [Fix]: The proxy URL now completely overrides the default prefix (https), instead of simply prepending the URL (thank you [@abimbola-michael-punch](https://github.com/abimbola-michael-punch)!)

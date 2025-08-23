@@ -48,7 +48,7 @@ class Prediction {
         json['structuredFormat'] != null
             ? StructuredFormatting.fromJson(json['structuredFormat'])
             : null;
-    types = json['types'].cast<String>();
+    types = json['types']?.cast<String>();
     lat = json['lat'];
     lng = json['lng'];
   }

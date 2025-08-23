@@ -64,7 +64,7 @@ class Result {
       });
     }
     placeId = json['placeId'];
-    types = json['types'].cast<String>();
+    types = json['types']?.cast<String>();
     url = json['googleMapsUri'];
     utcOffset = json['utcOffsetMinutes'];
     website = json['websiteUri'];
@@ -81,7 +81,7 @@ class AddressComponents {
   AddressComponents.fromJson(Map<String, dynamic> json) {
     longName = json['long_name'];
     shortName = json['short_name'];
-    types = json['types'].cast<String>();
+    types = json['types']?.cast<String>();
   }
 }
 
@@ -132,7 +132,7 @@ class Photos {
 
   Photos.fromJson(Map<String, dynamic> json) {
     height = json['heightPx'];
-    htmlAttributions = json['authorAttributions'].cast<String>();
+    htmlAttributions = json['authorAttributions']?.cast<String>();
     photoReference = json['name'];
     width = json['widthPx'];
   }
