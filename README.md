@@ -4,7 +4,7 @@ This Flutter package helps you build a TextField that provides autocompletion su
 
 Go check it out on [pub.dev](https://pub.dev/packages/google_places_autocomplete_text_field)!
 
-![preview](https://github.com/julienandco/google_places_autocomplete_text_field/blob/main/preview.gif)
+![](https://github.com/julienandco/google_places_autocomplete_text_field/blob/main/preview.gif)
 
 ## Add the dependency to pubspec.yml ➕
 
