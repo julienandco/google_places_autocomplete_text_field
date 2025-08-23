@@ -79,6 +79,9 @@ linux/
 # Web related 
 /web/
 
+# Misc
+DEVNOTES.md
+
 publish.sh
 
 # Exceptions to above rules.
