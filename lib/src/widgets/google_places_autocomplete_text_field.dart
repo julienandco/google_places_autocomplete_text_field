@@ -215,6 +215,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     subscription.cancel();
     subject.close();
     _focus.dispose();
+    _textEditingController.dispose();
     if (cancelableOperation != null) {
       cancelableOperation?.cancel();
     }
