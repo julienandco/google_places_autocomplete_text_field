@@ -77,6 +77,7 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.maxHeight = 200,
     this.onError,
     this.keepFocusAfterSuggestionSelection = false,
+    this.predictionsEmptyWidget,
     super.key,
   });
 
@@ -133,6 +134,10 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   /// Whether the focus should be kept on the text field after a suggestion is
   /// selected.
   final bool keepFocusAfterSuggestionSelection;
+
+  /// The widget that is shown inside the suggestions overlay when the API call
+  /// returns no predictions. If this is null, a default widget will be shown.
+  final Widget? predictionsEmptyWidget;
 
   // The following properties are the same as the ones in the TextFormField
   // widget. They are used to customize the text form field.
@@ -421,13 +426,14 @@ class _GooglePlacesAutoCompleteTextFormFieldState
 
   Widget get _overlayChild {
     if (allPredictions.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(10),
-        child: Text(
-          'No predictions...',
-          style: widget.predictionsStyle ?? widget.style,
-        ),
-      );
+      return widget.predictionsEmptyWidget ??
+          Container(
+            padding: const EdgeInsets.all(10),
+            child: Text(
+              'No predictions...',
+              style: widget.predictionsStyle ?? widget.style,
+            ),
+          );
     }
     return ListView.builder(
       padding: EdgeInsets.zero,
