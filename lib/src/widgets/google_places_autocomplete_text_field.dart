@@ -203,6 +203,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   CancelableOperation? cancelableOperation;
 
   late final TextEditingController _textEditingController;
+  bool _showPredictions = false;
 
   @override
   void dispose() {
@@ -236,6 +237,14 @@ class _GooglePlacesAutoCompleteTextFormFieldState
 
     _textEditingController =
         widget.textEditingController ?? TextEditingController();
+
+    _textEditingController.addListener(() {
+      if (_textEditingController.text.isEmpty) {
+        setState(() {
+          _showPredictions = false;
+        });
+      }
+    });
 
     if (widget.initialValue != null && widget.fetchSuggestionsForInitialValue) {
       subject.add(widget.initialValue!);
@@ -322,9 +331,16 @@ class _GooglePlacesAutoCompleteTextFormFieldState
         input: text,
         config: widget.config,
       );
+
       if (result == null) return;
       final predictions = result.predictions;
-      if (predictions == null || predictions.isEmpty) return;
+      if (predictions == null) return;
+
+      if (!_showPredictions) {
+        setState(() {
+          _showPredictions = true;
+        });
+      }
 
       allPredictions.clear();
       allPredictions.addAll(predictions);
@@ -364,45 +380,55 @@ class _GooglePlacesAutoCompleteTextFormFieldState
 
       _overlayEntry = null;
       _overlayEntry = _createOverlayEntry();
-      overlay.insert(_overlayEntry!);
+      if (_overlayEntry != null) {
+        overlay.insert(_overlayEntry!);
+      }
     });
   }
 
   OverlayEntry? _createOverlayEntry() {
-    if (context.findRenderObject() != null) {
-      final renderBox = context.findRenderObject() as RenderBox;
-      var size = renderBox.size;
-      var offset = renderBox.localToGlobal(Offset.zero);
+    if (!_showPredictions) return null;
+    final renderObject = context.findRenderObject();
+    if (renderObject == null) return null;
 
-      return OverlayEntry(
-        builder:
-            (context) => Positioned(
-              left: offset.dx,
-              top: size.height + offset.dy,
-              width: size.width,
-              child: CompositedTransformFollower(
-                showWhenUnlinked: false,
-                link: _layerLink,
-                offset: Offset(0.0, size.height + 5.0),
-                child:
-                    widget.overlayContainerBuilder?.call(_overlayChild) ??
-                    Material(
-                      elevation: 1.0,
-                      child: Container(
-                        constraints: BoxConstraints(
-                          maxHeight: widget.maxHeight,
-                        ),
-                        child: _overlayChild,
-                      ),
+    final renderBox = renderObject as RenderBox;
+    var size = renderBox.size;
+    var offset = renderBox.localToGlobal(Offset.zero);
+
+    return OverlayEntry(
+      builder:
+          (context) => Positioned(
+            left: offset.dx,
+            top: size.height + offset.dy,
+            width: size.width,
+            child: CompositedTransformFollower(
+              showWhenUnlinked: false,
+              link: _layerLink,
+              offset: Offset(0.0, size.height + 5.0),
+              child:
+                  widget.overlayContainerBuilder?.call(_overlayChild) ??
+                  Material(
+                    elevation: 1.0,
+                    child: Container(
+                      constraints: BoxConstraints(maxHeight: widget.maxHeight),
+                      child: _overlayChild,
                     ),
-              ),
+                  ),
             ),
-      );
-    }
-    return null;
+          ),
+    );
   }
 
   Widget get _overlayChild {
+    if (allPredictions.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(10),
+        child: Text(
+          'No predictions...',
+          style: widget.predictionsStyle ?? widget.style,
+        ),
+      );
+    }
     return ListView.builder(
       padding: EdgeInsets.zero,
       shrinkWrap: true,
@@ -436,12 +462,16 @@ class _GooglePlacesAutoCompleteTextFormFieldState
 
   void removeOverlay() {
     allPredictions.clear();
+    setState(() {
+      _showPredictions = false;
+    });
     try {
       _overlayEntry?.remove();
     } catch (_) {}
 
     _overlayEntry?.dispose();
     _overlayEntry = _createOverlayEntry();
+    if (_overlayEntry == null) return;
     Overlay.of(context).insert(_overlayEntry!);
     _overlayEntry!.markNeedsBuild();
   }
