@@ -76,6 +76,7 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.validator,
     this.maxHeight = 200,
     this.onError,
+    this.keepFocusAfterSuggestionSelection = false,
     super.key,
   });
 
@@ -126,7 +127,12 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   /// [overlayContainerBuilder] is provided, this value will be ignored.
   final double maxHeight;
 
+  /// The callback that is called when an error occurs during the API request.
   final Function? onError;
+
+  /// Whether the focus should be kept on the text field after a suggestion is
+  /// selected.
+  final bool keepFocusAfterSuggestionSelection;
 
   // The following properties are the same as the ones in the TextFormField
   // widget. They are used to customize the text form field.
@@ -404,13 +410,12 @@ class _GooglePlacesAutoCompleteTextFormFieldState
           onTap: () {
             if (index < allPredictions.length) {
               widget.onSuggestionClicked?.call(prediction);
-              if (!widget.config.fetchPlaceDetailsWithCoordinates) {
-                removeOverlay();
-                return;
+              if (widget.config.fetchPlaceDetailsWithCoordinates) {
+                getPlaceDetailsFromPlaceId(prediction);
               }
-
-              getPlaceDetailsFromPlaceId(prediction);
-
+              if (!widget.keepFocusAfterSuggestionSelection) {
+                _focus.unfocus();
+              }
               removeOverlay();
             }
           },
