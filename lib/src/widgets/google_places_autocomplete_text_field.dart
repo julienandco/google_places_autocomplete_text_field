@@ -202,6 +202,8 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   late StreamSubscription<String> subscription;
   CancelableOperation? cancelableOperation;
 
+  late final TextEditingController _textEditingController;
+
   @override
   void dispose() {
     subscription.cancel();
@@ -232,12 +234,15 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       });
     }
 
+    _textEditingController =
+        widget.textEditingController ?? TextEditingController();
+
     if (widget.initialValue != null && widget.fetchSuggestionsForInitialValue) {
       subject.add(widget.initialValue!);
     }
 
-    if (widget.initialValue != null && widget.textEditingController != null) {
-      widget.textEditingController!.text = widget.initialValue!;
+    if (widget.initialValue != null) {
+      _textEditingController.text = widget.initialValue!;
     }
 
     super.initState();
@@ -248,9 +253,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     return CompositedTransformTarget(
       link: _layerLink,
       child: TextFormField(
-        controller: widget.textEditingController,
-        initialValue:
-            widget.textEditingController != null ? null : widget.initialValue,
+        controller: _textEditingController,
         focusNode: _focus,
         decoration: widget.decoration,
         keyboardType: widget.keyboardType,
