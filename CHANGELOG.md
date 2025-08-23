@@ -1,5 +1,9 @@
 # Changelog 🪵
 
+## 2.0.3
+
+* [Chore]: README update
+
 ## 2.0.2
 
 * [Feat]: The text field unfocuses after a suggestion has been selected. This behaviour can be prohibited by setting `keepFocusAfterSuggestionSelection = true`.
