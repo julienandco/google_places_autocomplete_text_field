@@ -207,6 +207,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   late StreamSubscription<String> subscription;
   CancelableOperation? cancelableOperation;
 
+  bool _hasParentTextEditingController = false;
   late final TextEditingController _textEditingController;
   bool _showPredictions = false;
 
@@ -215,7 +216,9 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     subscription.cancel();
     subject.close();
     _focus.dispose();
-    _textEditingController.dispose();
+    if (!_hasParentTextEditingController) {
+      _textEditingController.dispose();
+    }
     if (cancelableOperation != null) {
       cancelableOperation?.cancel();
     }
@@ -241,8 +244,12 @@ class _GooglePlacesAutoCompleteTextFormFieldState
       });
     }
 
-    _textEditingController =
-        widget.textEditingController ?? TextEditingController();
+    _hasParentTextEditingController =
+        widget.textEditingController == null ? false : true;
+
+    if (!_hasParentTextEditingController) {
+      _textEditingController = TextEditingController();
+    }
 
     _textEditingController.addListener(() {
       if (_textEditingController.text.isEmpty) {
