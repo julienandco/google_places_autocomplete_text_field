@@ -35,7 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
       circleRadiusInKilometers: 1000,
     ),
     // only needed if you build for the web
-    proxyURL: 'https://your-proxy.com/',
+    // proxyURL: 'https://your-proxy.com/',
     placeTypeRestriction: PlaceType.city,
   );
 
