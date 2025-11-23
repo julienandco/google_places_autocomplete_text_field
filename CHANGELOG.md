@@ -1,5 +1,10 @@
 # Changelog 🪵
 
+## 3.0.0
+
+* [Breaking]: Explicitly passed `TextEditingController`s are not disposed by the widget anymore, but have to be handled manually (thank you [@Brandon2255p](https://github.com/Brandon2255p)!)
+* [Feat]: Added `predictionTextBuilder` for custom text and `predictionTextStyle` for styling per prediction (thank you [@fedecarroz](https://github.com/fedecarroz)!)
+
 ## 2.0.3
 
 * [Chore]: README update
