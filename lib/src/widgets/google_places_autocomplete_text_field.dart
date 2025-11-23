@@ -207,6 +207,7 @@ class _GooglePlacesAutoCompleteTextFormFieldState
   late StreamSubscription<String> subscription;
   CancelableOperation? cancelableOperation;
 
+  bool _disposeTextEditingController = false;
   late final TextEditingController _textEditingController;
   bool _showPredictions = false;
 
@@ -215,7 +216,9 @@ class _GooglePlacesAutoCompleteTextFormFieldState
     subscription.cancel();
     subject.close();
     _focus.dispose();
-    _textEditingController.dispose();
+    if (_disposeTextEditingController) {
+      _textEditingController.dispose();
+    }
     if (cancelableOperation != null) {
       cancelableOperation?.cancel();
     }
@@ -243,6 +246,8 @@ class _GooglePlacesAutoCompleteTextFormFieldState
 
     _textEditingController =
         widget.textEditingController ?? TextEditingController();
+
+    _disposeTextEditingController = widget.textEditingController == null;
 
     _textEditingController.addListener(() {
       if (_textEditingController.text.isEmpty) {
