@@ -22,6 +22,8 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.onSuggestionClicked,
     this.onPredictionWithCoordinatesReceived,
     this.predictionsStyle,
+    this.predictionTextBuilder,
+    this.predictionTextStyle,
     this.overlayContainerBuilder,
     this.minInputLength = 0,
     this.initialValue,
@@ -113,7 +115,20 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   onPredictionWithCoordinatesReceived;
 
   /// The text style of the predictions that are shown in the suggestions list.
+  /// This is used as a fallback if [predictionTextStyle] is not provided.
   final TextStyle? predictionsStyle;
+
+  /// A builder function that allows customizing the text displayed for each
+  /// prediction. If not provided, defaults to showing [Prediction.description].
+  /// This allows you to display any combination of prediction fields like
+  /// structured formatting, types, or custom formatting.
+  final String Function(Prediction prediction)? predictionTextBuilder;
+
+  /// A builder function that allows customizing the text style for each
+  /// individual prediction. If not provided, falls back to [predictionsStyle]
+  /// or [style]. This allows you to style predictions differently based on
+  /// their properties.
+  final TextStyle? Function(Prediction prediction)? predictionTextStyle;
 
   /// The widget that is shown as an overlay to the text form field. If this is
   /// null, a default Material widget will be used.
@@ -463,8 +478,12 @@ class _GooglePlacesAutoCompleteTextFormFieldState
           child: Container(
             padding: const EdgeInsets.all(10),
             child: Text(
-              prediction.description!,
-              style: widget.predictionsStyle ?? widget.style,
+              widget.predictionTextBuilder?.call(prediction) ??
+                  prediction.description!,
+              style:
+                  widget.predictionTextStyle?.call(prediction) ??
+                  widget.predictionsStyle ??
+                  widget.style,
             ),
           ),
         );
