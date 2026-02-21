@@ -115,20 +115,45 @@ class GooglePlacesApi implements PlacesApi {
     try {
       String url = _buildRequestUrl(
         proxyUrl: config.proxyURL,
-        appendix: '/${prediction.placeId}?fields=*&key=${config.apiKey}',
+        appendix: '/${prediction.placeId}',
       );
 
       final sessionToken = config.sessionToken;
       if (sessionToken != null) {
-        url += '&sessionToken=$sessionToken';
+        url += '?sessionToken=$sessionToken';
       }
-      final response = await _dio.get(url);
 
+      final response = await _dio.get(
+        url,
+        options: Options(
+          headers: {
+            'X-Goog-Api-Key': config.apiKey,
+            'X-Goog-FieldMask': 'location,formattedAddress,addressComponents',
+          },
+        ),
+      );
+
+      final data = response.data;
+
+      // Places API v1 response shape
+      if (data is Map<String, dynamic> &&
+          data['location'] is Map<String, dynamic>) {
+        final loc = data['location'] as Map<String, dynamic>;
+        final lat = loc['latitude'];
+        final lng = loc['longitude'];
+        if (lat != null && lng != null) {
+          prediction.lat = lat.toString();
+          prediction.lng = lng.toString();
+        }
+        prediction.formattedAddress = data['formattedAddress'] as String?;
+        prediction.addressComponents = data['addressComponents'] as List?;
+        return prediction;
+      }
+
+      // Fallback: legacy shape (if proxy returns legacy or older API)
       final placeDetails = PlaceDetails.fromJson(response.data);
-
       prediction.lat = placeDetails.result!.geometry!.location!.lat.toString();
       prediction.lng = placeDetails.result!.geometry!.location!.lng.toString();
-
       return prediction;
     } on DioException catch (e) {
       if (e.response != null) {
