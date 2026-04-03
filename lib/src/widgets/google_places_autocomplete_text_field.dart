@@ -22,7 +22,7 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
     this.onSuggestionClicked,
     this.onPredictionWithCoordinatesReceived,
     this.predictionsStyle,
-    this.predictionTextBuilder,
+    this.predictionBuilder,
     this.predictionTextStyle,
     this.overlayContainerBuilder,
     this.minInputLength = 0,
@@ -118,11 +118,12 @@ class GooglePlacesAutoCompleteTextFormField extends StatefulWidget {
   /// This is used as a fallback if [predictionTextStyle] is not provided.
   final TextStyle? predictionsStyle;
 
-  /// A builder function that allows customizing the text displayed for each
-  /// prediction. If not provided, defaults to showing [Prediction.description].
+  /// A builder function that allows customizing the widget displayed for each
+  /// prediction. If not provided, defaults to a Text widget showing [Prediction.description] if
+  /// provided, otherwise [Prediction.id].
   /// This allows you to display any combination of prediction fields like
   /// structured formatting, types, or custom formatting.
-  final String Function(Prediction prediction)? predictionTextBuilder;
+  final Widget Function(Prediction prediction)? predictionBuilder;
 
   /// A builder function that allows customizing the text style for each
   /// individual prediction. If not provided, falls back to [predictionsStyle]
@@ -475,17 +476,18 @@ class _GooglePlacesAutoCompleteTextFormFieldState
               removeOverlay();
             }
           },
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            child: Text(
-              widget.predictionTextBuilder?.call(prediction) ??
-                  prediction.description!,
-              style:
-                  widget.predictionTextStyle?.call(prediction) ??
-                  widget.predictionsStyle ??
-                  widget.style,
-            ),
-          ),
+          child:
+              widget.predictionBuilder?.call(prediction) ??
+              Container(
+                padding: const EdgeInsets.all(10),
+                child: Text(
+                  prediction.description ?? prediction.id ?? '',
+                  style:
+                      widget.predictionTextStyle?.call(prediction) ??
+                      widget.predictionsStyle ??
+                      widget.style,
+                ),
+              ),
         );
       },
     );
