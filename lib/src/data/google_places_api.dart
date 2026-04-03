@@ -67,6 +67,8 @@ class GooglePlacesApi implements PlacesApi {
 
     if (config.countries.isNotEmpty) {
       requestBody['includedRegionCodes'] = config.countries;
+    }
+    if (config.languageCode != null) {
       requestBody['languageCode'] = config.languageCode;
     }
     if (config.sessionToken != null) {
