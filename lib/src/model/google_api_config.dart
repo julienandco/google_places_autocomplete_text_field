@@ -84,7 +84,8 @@ class GoogleApiConfig {
 /// The different primary place types a search result can have.
 enum PlaceType {
   city,
-  region;
+  region,
+  route;
 
   /// Converts the place type to the JSON representation used in the api
   /// request.
@@ -92,6 +93,7 @@ enum PlaceType {
     return switch (this) {
       PlaceType.city => '(cities)',
       PlaceType.region => '(regions)',
+      PlaceType.route => 'route',
     };
   }
 }

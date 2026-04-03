@@ -27,6 +27,8 @@ class Prediction {
   List<String>? types;
   String? lat;
   String? lng;
+  String? formattedAddress;
+  List? addressComponents;
 
   Prediction({
     this.description,
@@ -39,6 +41,8 @@ class Prediction {
     this.types,
     this.lat,
     this.lng,
+    this.formattedAddress,
+    this.addressComponents,
   });
 
   Prediction.fromJson(Map<String, dynamic> json) {
