@@ -1,5 +1,11 @@
 # Changelog 🪵
 
+## 4.0.0
+
+* [Breaking]: Removed `predictionTextBuilder` and replaced it with `predictionBuilder` to enable fully custom widgets (thank you [@shanakamadusanka](https://github.com/shanakamadusanka)!)
+* [Feat]: Added `suggestionsFieldMask` and `placeDetailsFieldMask` to the `GoogleApiConfig` to enable explicit field mask setting per request (thank you [@RobK410](https://github.com/RobK410)!)
+* [Fix]: The language code is now always passed to the request and uncoupled from the `countries` flag (thank you [@srappose](https://github.com/srappose) for opening issue [#58](https://github.com/julienandco/google_places_autocomplete_text_field/issues/58)!)
+
 ## 3.0.0
 
 * [Breaking]: Explicitly passed `TextEditingController`s are not disposed by the widget anymore, but have to be handled manually (thank you [@Brandon2255p](https://github.com/Brandon2255p)!)
