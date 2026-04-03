@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_places_autocomplete_text_field/google_places_autocomplete_text_field.dart';
+import 'package:google_places_autocomplete_text_field/src/model/field_mask.dart';
 
 /// {@template places_api}
 /// Interface for Places Autocomplete requests.
@@ -42,6 +43,16 @@ class GooglePlacesApi implements PlacesApi {
     return url;
   }
 
+  Map<String, dynamic> _buildAutocompleteRequestHeaders(
+    GoogleApiConfig config,
+  ) {
+    return {
+      'X-Goog-Api-Key': config.apiKey,
+      'X-Goog-FieldMask':
+          config.suggestionsFieldMask ?? FieldMask.defaultSuggestionsFieldMask,
+    };
+  }
+
   @override
   Future<PlacesAutocompleteResponse?> getSuggestionsForInput({
     required String input,
@@ -75,9 +86,9 @@ class GooglePlacesApi implements PlacesApi {
           config.placeTypeRestriction!.toJson();
     }
 
-    Options options = Options(
-      headers: {'X-Goog-Api-Key': config.apiKey, 'X-Goog-FieldMask': '*'},
-    );
+    final headers = _buildAutocompleteRequestHeaders(config);
+
+    Options options = Options(headers: headers);
 
     try {
       final response = await _dio.post(
@@ -113,9 +124,13 @@ class GooglePlacesApi implements PlacesApi {
     required GoogleApiConfig config,
   }) async {
     try {
+      final fieldMask =
+          config.placeDetailsFieldMask ??
+          FieldMask.defaultPlaceDetailsFieldMask;
       String url = _buildRequestUrl(
         proxyUrl: config.proxyURL,
-        appendix: '/${prediction.placeId}?fields=*&key=${config.apiKey}',
+        appendix:
+            '/${prediction.placeId}?fields=$fieldMask&key=${config.apiKey}',
       );
 
       final sessionToken = config.sessionToken;

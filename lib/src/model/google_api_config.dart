@@ -16,6 +16,8 @@ class GoogleApiConfig {
     this.locationBias,
     this.locationRestriction,
     this.placeTypeRestriction,
+    this.suggestionsFieldMask,
+    this.placeDetailsFieldMask,
   }) : assert(
          (locationBias == null || locationRestriction == null),
          'Only one of locationBias or locationRestriction can be provided',
@@ -69,6 +71,14 @@ class GoogleApiConfig {
   /// places of the specified type.
   /// For more info, refer to Google's docs: https://developers.google.com/maps/documentation/places/web-service/place-autocomplete#place-types
   final PlaceType? placeTypeRestriction;
+
+  /// The field mask that should be returned in the place details response.
+  /// If nothing is provided, the default place detailsfield mask is used.
+  final String? placeDetailsFieldMask;
+
+  /// The field mask that should be returned in the suggestions response.
+  /// If nothing is provided, the default suggestions field mask is used.
+  final String? suggestionsFieldMask;
 }
 
 /// The different primary place types a search result can have.
