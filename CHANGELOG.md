@@ -1,5 +1,9 @@
 # Changelog 🪵
 
+## 4.1.0
+
+* [Feat]: Added `packageName`, `sha1` and `iosBundleId` to the `GoogleApiConfig` to enable application restrictions on the Google API keys (thank you [@outdoorapps](https://github.com/outdoorapps)!)
+
 ## 4.0.0
 
 * [Breaking]: Removed `predictionTextBuilder` and replaced it with `predictionBuilder` to enable fully custom widgets (thank you [@shanakamadusanka](https://github.com/shanakamadusanka)!)
