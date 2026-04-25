@@ -18,6 +18,9 @@ class GoogleApiConfig {
     this.placeTypeRestriction,
     this.suggestionsFieldMask,
     this.placeDetailsFieldMask,
+    this.iosBundleId,
+    this.packageName,
+    this.sha1,
   }) : assert(
          (locationBias == null || locationRestriction == null),
          'Only one of locationBias or locationRestriction can be provided',
@@ -79,6 +82,18 @@ class GoogleApiConfig {
   /// The field mask that should be returned in the suggestions response.
   /// If nothing is provided, the default suggestions field mask is used.
   final String? suggestionsFieldMask;
+
+  /// The android package name of your application. Only added to headers when set. Useful when
+  /// your API key is restricted to the application in the Google Cloud Console.
+  final String? packageName;
+
+  /// The android certificate sha1 hash of your application. Only added to headers when set. Useful when
+  /// your API key is restricted to the application in the Google Cloud Console.
+  final String? sha1;
+
+  /// The iOS bundle id of your application. Only added to headers when set. Useful when
+  /// your API key is restricted to the application in the Google Cloud Console.
+  final String? iosBundleId;
 }
 
 /// The different primary place types a search result can have.

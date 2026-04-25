@@ -50,6 +50,10 @@ class GooglePlacesApi implements PlacesApi {
       'X-Goog-Api-Key': config.apiKey,
       'X-Goog-FieldMask':
           config.suggestionsFieldMask ?? FieldMask.defaultSuggestionsFieldMask,
+      if (config.packageName != null) 'X-Android-Package': config.packageName,
+      if (config.sha1 != null) 'X-Android-Cert': config.sha1,
+      if (config.iosBundleId != null)
+        'X-Ios-Bundle-Identifier': config.iosBundleId,
     };
   }
 
