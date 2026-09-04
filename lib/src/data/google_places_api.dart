@@ -43,13 +43,13 @@ class GooglePlacesApi implements PlacesApi {
     return url;
   }
 
-  Map<String, dynamic> _buildAutocompleteRequestHeaders(
-    GoogleApiConfig config,
-  ) {
+  Map<String, dynamic> _buildRequestHeaders({
+    required GoogleApiConfig config,
+    required String fieldMask,
+  }) {
     return {
       'X-Goog-Api-Key': config.apiKey,
-      'X-Goog-FieldMask':
-          config.suggestionsFieldMask ?? FieldMask.defaultSuggestionsFieldMask,
+      'X-Goog-FieldMask': fieldMask,
       if (config.packageName != null) 'X-Android-Package': config.packageName,
       if (config.sha1 != null) 'X-Android-Cert': config.sha1,
       if (config.iosBundleId != null)
@@ -92,7 +92,11 @@ class GooglePlacesApi implements PlacesApi {
           config.placeTypeRestriction!.toJson();
     }
 
-    final headers = _buildAutocompleteRequestHeaders(config);
+    final headers = _buildRequestHeaders(
+      config: config,
+      fieldMask:
+          config.suggestionsFieldMask ?? FieldMask.defaultSuggestionsFieldMask,
+    );
 
     Options options = Options(headers: headers);
 
@@ -133,48 +137,35 @@ class GooglePlacesApi implements PlacesApi {
       final fieldMask =
           config.placeDetailsFieldMask ??
           FieldMask.defaultPlaceDetailsFieldMask;
-      String url = _buildRequestUrl(
+
+      final url = _buildRequestUrl(
         proxyUrl: config.proxyURL,
-        appendix:
-            '/${prediction.placeId}?fields=$fieldMask&key=${config.apiKey}',
+        appendix: '/${prediction.placeId}',
       );
 
       final sessionToken = config.sessionToken;
-      if (sessionToken != null) {
-        url += '?sessionToken=$sessionToken';
-      }
 
       final response = await _dio.get(
         url,
+        queryParameters: {
+          if (sessionToken != null) 'sessionToken': sessionToken,
+        },
         options: Options(
-          headers: {
-            'X-Goog-Api-Key': config.apiKey,
-            'X-Goog-FieldMask': 'location,formattedAddress,addressComponents',
-          },
+          headers: _buildRequestHeaders(config: config, fieldMask: fieldMask),
         ),
       );
 
-      final data = response.data;
+      final result = PlaceDetails.fromJson(response.data).result;
 
-      // Places API v1 response shape
-      if (data is Map<String, dynamic> &&
-          data['location'] is Map<String, dynamic>) {
-        final loc = data['location'] as Map<String, dynamic>;
-        final lat = loc['latitude'];
-        final lng = loc['longitude'];
-        if (lat != null && lng != null) {
-          prediction.lat = lat.toString();
-          prediction.lng = lng.toString();
-        }
-        prediction.formattedAddress = data['formattedAddress'] as String?;
-        prediction.addressComponents = data['addressComponents'] as List?;
-        return prediction;
+      final location = result?.geometry?.location;
+      if (location?.lat != null && location?.lng != null) {
+        prediction.lat = location!.lat.toString();
+        prediction.lng = location.lng.toString();
       }
 
-      // Fallback: legacy shape (if proxy returns legacy or older API)
-      final placeDetails = PlaceDetails.fromJson(response.data);
-      prediction.lat = placeDetails.result!.geometry!.location!.lat.toString();
-      prediction.lng = placeDetails.result!.geometry!.location!.lng.toString();
+      prediction.formattedAddress = result?.formattedAddress;
+      prediction.addressComponents = result?.addressComponents;
+
       return prediction;
     } on DioException catch (e) {
       if (e.response != null) {

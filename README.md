@@ -34,10 +34,13 @@ dependencies:
           ), // either this or locationBias (or nothing)
           placeTypeRestriction: PlaceType.city, // if you want specific place types
         ),
-        onPlaceDetailsWithCoordinatesReceived: (prediction) {
+        onPredictionWithCoordinatesReceived: (prediction) {
          // this method will return latlng with place detail
         print("Coordinates: (${prediction.lat},${prediction.lng})");
-        }, // this callback is called when fetchCoordinates is true
+        // the place details are returned on the prediction as well
+        print("Address: ${prediction.formattedAddress}");
+        print("Components: ${prediction.addressComponents}");
+        }, // this callback is called when fetchPlaceDetailsWithCoordinates is true
         onSuggestionClicked: (prediction) {
          controller.text = prediction.description;
           controller.selection = TextSelection.fromPosition(TextPosition(offset: prediction.description.length));

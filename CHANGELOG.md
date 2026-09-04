@@ -1,5 +1,13 @@
 # Changelog 🪵
 
+## 4.2.0
+
+* [Feat]: Added `PlaceType.route` to the place type restrictions (thank you [@mauriziopinotti](https://github.com/mauriziopinotti)!)
+* [Feat]: The `Prediction` passed to `onPredictionWithCoordinatesReceived` now also carries `formattedAddress` and `addressComponents`, so no extra place details request is needed to read them (thank you [@mauriziopinotti](https://github.com/mauriziopinotti)!)
+* [Fix]: The place details request now sends the API key, the configured `placeDetailsFieldMask` and the application restriction headers (`packageName`, `sha1`, `iosBundleId`) the same way the autocomplete request does. Previously the key and field mask were passed as query parameters and the restriction headers were missing entirely.
+* [Fix]: `AddressComponents` now deserializes the `longText` and `shortText` keys returned by the Places API (New) instead of the legacy `long_name` and `short_name` keys, and additionally exposes `languageCode`.
+* [Fix]: A place details response without a location no longer throws, and the session token is now appended as a proper query parameter.
+
 ## 4.1.0
 
 * [Feat]: Added `packageName`, `sha1` and `iosBundleId` to the `GoogleApiConfig` to enable application restrictions on the Google API keys (thank you [@outdoorapps](https://github.com/outdoorapps)!)
