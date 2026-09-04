@@ -75,13 +75,20 @@ class AddressComponents {
   String? longName;
   String? shortName;
   List<String>? types;
+  String? languageCode;
 
-  AddressComponents({this.longName, this.shortName, this.types});
+  AddressComponents({
+    this.longName,
+    this.shortName,
+    this.types,
+    this.languageCode,
+  });
 
   AddressComponents.fromJson(Map<String, dynamic> json) {
-    longName = json['long_name'];
-    shortName = json['short_name'];
+    longName = json['longText'];
+    shortName = json['shortText'];
     types = json['types']?.cast<String>();
+    languageCode = json['languageCode'];
   }
 }
 
@@ -103,8 +110,8 @@ class Location {
   Location({this.lat, this.lng});
 
   Location.fromJson(Map<String, dynamic> json) {
-    lat = json['latitude'];
-    lng = json['longitude'];
+    lat = (json['latitude'] as num?)?.toDouble();
+    lng = (json['longitude'] as num?)?.toDouble();
   }
 }
 

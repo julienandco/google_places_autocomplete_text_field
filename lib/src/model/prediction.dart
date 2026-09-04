@@ -1,3 +1,5 @@
+import 'place_details.dart';
+
 class PlacesAutocompleteResponse {
   List<Prediction>? predictions;
   String? status;
@@ -27,6 +29,8 @@ class Prediction {
   List<String>? types;
   String? lat;
   String? lng;
+  String? formattedAddress;
+  List<AddressComponents>? addressComponents;
 
   Prediction({
     this.description,
@@ -39,6 +43,8 @@ class Prediction {
     this.types,
     this.lat,
     this.lng,
+    this.formattedAddress,
+    this.addressComponents,
   });
 
   Prediction.fromJson(Map<String, dynamic> json) {
