@@ -1,5 +1,9 @@
 # Changelog 🪵
 
+## 5.0.0
+
+* [Breaking]: Migrated from `package:flutter/material.dart` to `package:material_ui/material_ui.dart`, the standalone Material library of Flutter 3.47 (https://docs.flutter.dev/release/breaking-changes/material-ui-and-cupertino-ui). `GooglePlacesAutoCompleteTextFormField` now takes and renders `material_ui` types (`InputDecoration`, `Theme`), so an app must import `package:material_ui` to use 5.x; apps still on `package:flutter/material.dart` stay on 4.x. Minimum Flutter 3.47.0 and Dart 3.13.0 (#75).
+
 ## 4.2.0
 
 * [Feat]: Added `PlaceType.route` to the place type restrictions (thank you [@mauriziopinotti](https://github.com/mauriziopinotti)!)

@@ -16,6 +16,8 @@ dependencies:
 
 ```
 
+Version 5.0.0 and up import `package:material_ui` (Flutter 3.47 or later). If your app still imports `package:flutter/material.dart`, stay on `^4.2.0`.
+
 ## Integrate the Google AutoComplete TextField Widget in your code 🧩
 
 ```dart
